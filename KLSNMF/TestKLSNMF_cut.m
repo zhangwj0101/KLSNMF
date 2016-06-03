@@ -44,7 +44,7 @@ for rr=1:length(filedors)
     numCircle = 180;
     best = [];
     index= 1;
-    Results = KLSNMF(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
+    Results = KLSNMFNFS(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
     [res] = xlsread(strcat('Results.xls'));
     xlswrite(strcat('Results.xls'),[res;Results]);
 end
