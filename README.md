@@ -10,3 +10,4 @@
 
 
 ## 所有原始语料和处理过的语料下载地址 <a href='http://pan.baidu.com/s/1bpbo7hH'  target="_blank"> 跨语言数据集Matlab版</a> 
+## 逻辑回归下载地址<a href='http://research.microsoft.com/en-us/um/people/minka/papers/logreg/'>matlab版本逻辑回归</a>
