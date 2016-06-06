@@ -9,4 +9,4 @@
 | walle | 联合 | 不变 | 列为一 |F和S分解，保证公共部分尽量相似|
 
 
-## 所有原始预料和处理过的预料下载地址 <a href='http://pan.baidu.com/s/1bpbo7hH'  target="_blank"> 跨语言数据集Matlab版</a> 
+## 所有原始语料和处理过的语料下载地址 <a href='http://pan.baidu.com/s/1bpbo7hH'  target="_blank"> 跨语言数据集Matlab版</a> 
