@@ -49,7 +49,7 @@ for rr=1:length(filedors)
 
     xlswrite(strcat(wname,'.xls'),[1:1:numCircle]);
     for time=1:10
-        Results = KLSNMFNFS(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
+        Results = LSFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
         [res] = xlsread(strcat(wname,'.xls'));
         xlswrite(strcat(wname,'.xls'),[res;Results(1,:)]);
     end

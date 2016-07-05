@@ -49,7 +49,7 @@ for rr=1:length(filedors)
     filename = regexp(base, '/', 'split');
     wname = strcat(basetypePath,char(filename(size(filename,2))));
     xlswrite(strcat(wname,'.xls'),[1:1:numCircle]);
-    Results = KLSNMFNFS(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
+    Results = LSFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
     [res] = xlsread(strcat(wname,'.xls'));
     xlswrite(strcat(wname,'.xls'),[res;Results]);
 end

@@ -1,4 +1,4 @@
-function Results = KLSNMFNFS(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle)
+function Results = LSFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle)
 %%% 联合训练 列为一
 G0 = [];
 for i = 1:length(TrainY)
