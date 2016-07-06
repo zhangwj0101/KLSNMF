@@ -9,6 +9,7 @@ for rr=1:length(FileList)
     end
 end
 xlswrite(strcat('dirs.xls'),filedors');
+xlswrite(strcat('average.xls'),0);
 for rr=1:length(filedors)
     base = filedors{rr};
     trainPath = strcat(base,'/Train.data');
@@ -32,7 +33,7 @@ for rr=1:length(filedors)
             TrainY(id) = -1;
         end
     end
-    
+ 
     for id = 1:length(TestY)
         if TestY(id) == 2
             TestY(id) = -1;
@@ -44,15 +45,19 @@ for rr=1:length(filedors)
     numCircle = 180;
     best = [];
     index= 1;
+    iternum = 1;
     filename = regexp(base, '/', 'split');
     wname = char(filename(size(filename,2)));
-
+   average = 0.0;
     xlswrite(strcat(wname,'.xls'),[1:1:numCircle]);
-    for time=1:10
+    for time=1:iternum
         Results = LSFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
         [res] = xlsread(strcat(wname,'.xls'));
+        average = average + max(Results(1,:));
         xlswrite(strcat(wname,'.xls'),[res;Results(1,:)]);
     end
+    [res] = xlsread(strcat('average.xls'));
+    xlswrite(strcat('average.xls'),[res;average/iternum]);
 end
 % x = 0:1:numCircle-1;
 % figure

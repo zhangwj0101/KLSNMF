@@ -1,5 +1,5 @@
 clear all;
-base='E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_de_dvd_books\';
+base='C:\mydata_add_withtraintest_cutshortdoc\en_de_dvd_books\';
 TrainX = load(strcat(base,'Train.data'));
 TrainX = spconvert(TrainX);
 TrainY = load(strcat(base,'Train.label'));

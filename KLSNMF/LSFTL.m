@@ -95,11 +95,11 @@ tempFt = [Ft1 Ft];
 tempSt = [St1;St];
 
 fvalue = 0;
-v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
-v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
-v3 = alpha*trace(Fs1'*Fs1-2*Fs1'*Ft1+Ft1'*Ft1);
-v4 = alpha*trace(Ss1'*Ss1-2*Ss1'*St1+St1'*St1);
-fvalue = v1+v2+v3+v4;
+%v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
+%v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
+%v3 = alpha*trace(Fs1'*Fs1-2*Fs1'*Ft1+Ft1'*Ft1);
+%v4 = alpha*trace(Ss1'*Ss1-2*Ss1'*St1+St1'*St1);
+%fvalue = v1+v2+v3+v4;
 tempf = 0;
 r = 1.5
 for circleID = 1:numCircle
@@ -163,16 +163,21 @@ for circleID = 1:numCircle
         end
     end
     
-    tempDiff = Ss-St;
-    tempDiff(find(tempDiff >= 0)) = 1;
-    tempDiff(find(tempDiff < 0)) = -1;
-    sd = Xs-Fs1*Ss1*Gs';
+%     tempDiff = Ss-St;
+%     tempDiff(find(tempDiff >= 0)) = 1;
+%     tempDiff(find(tempDiff < 0)) = -1;
+%     sd = Xs-Fs1*Ss1*Gs';
     %%Ss
     tempM = 2*(Fs'*(Fs*Ss)*Gs'*Gs);
-    tempM1 = 2*Fs'*sd*Gs;
+    tempM1 = 2*Fs'*( Xs-Fs1*Ss1*Gs')*Gs;
     for i = 1:size(Ss,1)
         for j = 1:size(Ss,2)
-            tempMu = tempM(i,j) + r*tempDiff(i,j);
+            if Ss(i,j) >= St(i,j)
+                gradient = 1;
+            else
+                 gradient = -1;
+            end
+            tempMu = tempM(i,j) + r*gradient;
             if tempMu > 0
                 Ss(i,j) = Ss(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -180,7 +185,6 @@ for circleID = 1:numCircle
             end
         end
     end
-    
     
     %%  Ft1
     tempM = (Ft1*St1+Ft*St)*Gt'*Gt*St1' + alpha*Ft1;
@@ -249,15 +253,19 @@ for circleID = 1:numCircle
     %%将Ss直接给St然后再迭代操作
     %     St = Ss;
     %%%新加
-    tempDiff = St-Ss;
-    tempDiff(find(tempDiff >= 0)) = 1;
-    tempDiff(find(tempDiff < 0)) = -1;
-    td = Xt-Ft1*St1*Gt';
+%     tempDiff = St-Ss;
+%     tempDiff(find(tempDiff >= 0)) = 1;
+%     tempDiff(find(tempDiff < 0)) = -1;
     tempM = 2*Ft'*(Ft*St)*Gt'*Gt;
-    tempM1 = 2*Ft'*td*Gt;
+    tempM1 = 2*Ft'*(Xt-Ft1*St1*Gt')*Gt;
     for i = 1:size(St,1)
         for j = 1:size(St,2)
-            tempMu = tempM(i,j) + r*tempDiff(i,j);
+             if St(i,j) >= Ss(i,j)
+                gradient = 1;
+            else
+                 gradient = -1;
+            end
+            tempMu = tempM(i,j) + r*gradient;
             if tempMu > 0
                 St(i,j) = St(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -289,25 +297,25 @@ for circleID = 1:numCircle
         end
     end
     
-    tempFs = [Fs1 Fs];
-    tempSs = [Ss1;Ss];
-    tempFt = [Ft1 Ft];
-    tempSt = [St1;St];
-    v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
-    v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
-    v3 = alpha*trace(Fs1'*Fs1-2*Fs1'*Ft1+Ft1'*Ft1);
-    v4 = alpha*trace(Ss1'*Ss1-2*Ss1'*St1+St1'*St1);
-    fvalue = v1+v2+v3+v4;
+   % tempFs = [Fs1 Fs];
+   % tempSs = [Ss1;Ss];
+   % tempFt = [Ft1 Ft];
+   % tempSt = [St1;St];
+   % v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
+   % v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
+   % v3 = alpha*trace(Fs1'*Fs1-2*Fs1'*Ft1+Ft1'*Ft1);
+   % v4 = alpha*trace(Ss1'*Ss1-2*Ss1'*St1+St1'*St1);
+   % fvalue = v1+v2+v3+v4;
     tempf = 0;
     if circleID == 1
         tempf = fvalue;
     end
-    if circleID > 1
-        if abs(tempf - fvalue) < 10^(-12)
-            break;
-        end
-        tempf = fvalue;
-    end
+%     if circleID > 1
+%         if abs(tempf - fvalue) < 10^(-12)
+%             break;
+%         end
+%         tempf = fvalue;
+%     end
     
     pp = [];
     for i = 1:length(TestY)
