@@ -145,7 +145,6 @@ for circleID = 1:numCircle
     tempM1 = Xs*Gs*Ss';
     for i = 1:size(Fs,1)
         for j = 1:size(Fs,2)
-           
             tempMu = tempM(i,j) ;
             if tempMu > 0
                 Fs(i,j) = Fs(i,j)*(tempM1(i,j)/tempMu)^(0.5);
@@ -164,18 +163,16 @@ for circleID = 1:numCircle
         end
     end
     
+    tempDiff = Ss-St;
+    tempDiff(find(tempDiff >= 0)) = 1;
+    tempDiff(find(tempDiff < 0)) = -1;
     sd = Xs-Fs1*Ss1*Gs';
     %%Ss
     tempM = 2*(Fs'*(Fs*Ss)*Gs'*Gs);
     tempM1 = 2*Fs'*sd*Gs;
     for i = 1:size(Ss,1)
         for j = 1:size(Ss,2)
-            if Ss(i,j) > St(i,j)
-                gradient = 1;
-            else
-                gradient = -1;
-            end
-            tempMu = tempM(i,j) + r*gradient;
+            tempMu = tempM(i,j) + r*tempDiff(i,j);
             if tempMu > 0
                 Ss(i,j) = Ss(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -229,7 +226,7 @@ for circleID = 1:numCircle
     tempM1 = Xt*Gt*St';
     for i = 1:size(Ft,1)
         for j = 1:size(Ft,2)
-        
+            
             tempMu = tempM(i,j);
             if tempMu > 0
                 Ft(i,j) = Ft(i,j)*(tempM1(i,j)/tempMu)^(0.5);
@@ -252,17 +249,15 @@ for circleID = 1:numCircle
     %%将Ss直接给St然后再迭代操作
     %     St = Ss;
     %%%新加
+    tempDiff = St-Ss;
+    tempDiff(find(tempDiff >= 0)) = 1;
+    tempDiff(find(tempDiff < 0)) = -1;
     td = Xt-Ft1*St1*Gt';
     tempM = 2*Ft'*(Ft*St)*Gt'*Gt;
     tempM1 = 2*Ft'*td*Gt;
     for i = 1:size(St,1)
         for j = 1:size(St,2)
-              if St(i,j) > Ss(i,j)
-                gradient = 1;
-            else
-                gradient = -1;
-            end
-            tempMu = tempM(i,j) + r*gradient;
+            tempMu = tempM(i,j) + r*tempDiff(i,j);
             if tempMu > 0
                 St(i,j) = St(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
