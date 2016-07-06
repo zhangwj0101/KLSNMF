@@ -1,13 +1,13 @@
 clear all;
-
-TrainX = load('C:\NMTF/Train.data');
+base='E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_de_dvd_books\';
+TrainX = load(strcat(base,'Train.data'));
 TrainX = spconvert(TrainX);
-TrainY = load('C:\NMTF/Train.label');
+TrainY = load(strcat(base,'Train.label'));
 TrainY = TrainY';
-TestX = load('C:\NMTF/Test.data');
+TestX = load(strcat(base,'Test.data'));
 TestX = spconvert(TestX);
 %%
-TestY = load('C:\NMTF/Test.label');
+TestY = load(strcat(base,'Test.label'));
 TestY = TestY';
 
 for id = 1:length(TrainY)

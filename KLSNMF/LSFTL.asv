@@ -47,9 +47,9 @@ r = numK;
 all = [TrainX TestX];
 [m,n] = size(all);
 Winit = abs(randn(m,r));
-%Hinit = abs(randn(r,n));
-%[W,H] = nmf(full(all),Winit,Hinit,0.0000000000001,25,8000);
-W = Winit;
+Hinit = abs(randn(r,n));
+[W,H] = nmf(full(all),Winit,Hinit,0.0000000000001,25,8000);
+
 for id=1:size(W,2)
     W(:,id) = W(:,id)/sum(W(:,id));
 end
@@ -166,8 +166,8 @@ for circleID = 1:numCircle
     
     sd = Xs-Fs1*Ss1*Gs';
     %%Ss
-    tempM = 2*(Fs'*(Fs*Ss)*Gs'*Gs);
-    tempM1 = 2*Fs'*sd*Gs;
+    tempM = (Fs'*(Fs*Ss)*Gs'*Gs);
+    tempM1 = 2Fs'*sd*Gs;
     for i = 1:size(Ss,1)
         for j = 1:size(Ss,2)
             if Ss(i,j) > St(i,j)
@@ -252,9 +252,9 @@ for circleID = 1:numCircle
     %%将Ss直接给St然后再迭代操作
     %     St = Ss;
     %%%新加
-    td = Xt-Ft1*St1*Gt';
-    tempM = 2*Ft'*(Ft*St)*Gt'*Gt;
-    tempM1 = 2*Ft'*td*Gt;
+     td = Xt-Ft1*St1*Gt';
+    tempM = Ft'*(Ft*St)*Gt'*Gt;
+    tempM1 = Ft'*td'*Gt;
     for i = 1:size(St,1)
         for j = 1:size(St,2)
               if St(i,j) > Ss(i,j)
