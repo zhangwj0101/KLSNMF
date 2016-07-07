@@ -47,6 +47,7 @@ r = numK;
 all = [TrainX TestX];
 [m,n] = size(all);
 Winit = abs(randn(m,r));
+% Winit = ones(m,r);
 %Hinit = abs(randn(r,n));
 %[W,H] = nmf(full(all),Winit,Hinit,0.0000000000001,25,8000);
 W = Winit;
@@ -141,11 +142,16 @@ for circleID = 1:numCircle
     end
     
     %%Fs
-    tempM = (Fs1*Ss1+Fs*Ss)*(Gs'*Gs)*Ss';
-    tempM1 = Xs*Gs*Ss';
+    tempM = (Fs*Ss)*(Gs'*Gs)*Ss';
+    tempM1 = (Xs-Fs1*Ss1*Gs')*Gs*Ss';
     for i = 1:size(Fs,1)
         for j = 1:size(Fs,2)
-            tempMu = tempM(i,j) ;
+            if Fs(i,j) > Ft(i,j)
+                gradient = 1;
+            else
+                gradient = -1;
+            end
+            tempMu = tempM(i,j) +r*gradient;
             if tempMu > 0
                 Fs(i,j) = Fs(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -226,12 +232,16 @@ for circleID = 1:numCircle
     
     
     %%  Ft
-    tempM = (Ft1*St1+Ft*St)*Gt'*Gt*St';
-    tempM1 = Xt*Gt*St';
+    tempM = (Ft*St)*Gt'*Gt*St';
+    tempM1 = (Xt-Ft1*St1*Gt')*Gt*St';
     for i = 1:size(Ft,1)
         for j = 1:size(Ft,2)
-            
-            tempMu = tempM(i,j);
+            if Ft(i,j) > Fs(i,j)
+                gradient = 1;
+            else
+                gradient = -1;
+            end
+            tempMu = tempM(i,j) + r*gradient;
             if tempMu > 0
                 Ft(i,j) = Ft(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else

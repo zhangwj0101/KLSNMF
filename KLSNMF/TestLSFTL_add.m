@@ -1,5 +1,5 @@
 
-str = 'C:\mydata_add_withtraintest_cutshortdoc/';
+str = 'G:\mydata_add_withtraintest/';
 FileList=dir(str);
 ff = 1;
 for rr=1:length(FileList)
