@@ -1,5 +1,5 @@
 
-str = 'G:\mydata_add_withtraintest/';
+str = 'C:\mydata_add_withtraintest_cutshortdoc_for_wdq/';
 FileList=dir(str);
 ff = 1;
 for rr=1:length(FileList)
@@ -45,7 +45,7 @@ for rr=1:length(filedors)
     numCircle = 180;
     best = [];
     index= 1;
-    iternum = 1;
+    iternum = 10;
     filename = regexp(base, '/', 'split');
     wname = char(filename(size(filename,2)));
    average = 0.0;
@@ -54,7 +54,7 @@ for rr=1:length(filedors)
         Results = LSFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
         [res] = xlsread(strcat(wname,'.xls'));
         average = average + max(Results(1,:));
-        xlswrite(strcat(wname,'.xls'),[res;Results(1,:)]);
+        xlswrite(strcat(wname,'.xls'),[res;Results]);
     end
     [res] = xlsread(strcat('average.xls'));
     xlswrite(strcat('average.xls'),[res;average/iternum]);
