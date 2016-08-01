@@ -29,21 +29,3 @@ numCircle = 180;
 best = [];
 index= 1;
 Results = KLSNMF(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
-
-return ;
-% for tempalph=0:0.5:10
-%     Results = MTrick(TrainX,TrainY,TestX,TestY,tempalph,beta,numK,numCircle);
-%     [res] = xlsread(strcat('Results_alpha.xls'));
-%     xlswrite(strcat('Results_alpha.xls'),[res;Results]);
-% end
-% return ;
-
-Results = KLSNMF(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
-[res] = xlsread(strcat('Results.xls'));
-xlswrite(strcat('Results.xls'),[res;Results]);
-% x = 0:1:numCircle-1;
-% figure
-% plot(x,Results,'r');
-% grid on
-% xlabel('x');
-% ylabel('Results');

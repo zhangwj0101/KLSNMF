@@ -45,9 +45,9 @@ r = numK;
 all = [TrainX TestX];
 [m,n] = size(all);
 Winit = abs(randn(m,r));
-Hinit = abs(randn(r,n));
-[W,H] = nmf(full(all),Winit,Hinit,0.0000000000001,25,8000);
-
+% Hinit = abs(randn(r,n));
+% [W,H] = nmf(full(all),Winit,Hinit,0.0000000000001,25,8000);
+W = Winit;
 for id=1:size(W,2)
     W(:,id) = W(:,id)/sum(W(:,id));
 end
@@ -78,7 +78,7 @@ for circleID = 1:numCircle
      
     %%Fs
     tempM = (Fs*Ss*Gs'*Gs*Ss');
-    tempM1 = Xs*Gs*Ss' ;
+    tempM1 = Xs*Gs*Ss';
     for i = 1:size(Fs,1)
         for j = 1:size(Fs,2)
             if tempM(i,j)~=0
@@ -167,8 +167,8 @@ for circleID = 1:numCircle
             end
         end
     end
-    
-    fvalue = trace(Xs'*Xs-2*Xs'*Fs*Ss*Gs'+Gs*Ss'*Fs'*Fs*Ss*Gs')+trace(Xt'*Xt-2*Xt'*Ft*St*Gt'+Gt*St'*Ft'*Ft*St*Gt')+alpha*trace(St'*St-2*St'*Ss+Ss'*Ss);
+    diffs = trace(St'*St-2*St'*Ss+Ss'*Ss);
+    fvalue = trace(Xs'*Xs-2*Xs'*Fs*Ss*Gs'+Gs*Ss'*Fs'*Fs*Ss*Gs')+trace(Xt'*Xt-2*Xt'*Ft*St*Gt'+Gt*St'*Ft'*Ft*St*Gt')+alpha*diffs;
     if circleID == 1
         tempf = fvalue;
     end
@@ -189,7 +189,7 @@ for circleID = 1:numCircle
     end
     Results(circleID) = getResult(pp,TestY)*100;
     lvalues(circleID) = fvalue;
-    fprintf('the %g iteration is %g, the max is %g. the value of objective is %g\n',circleID,getResult(pp,TestY),max(Results),fvalue);
+    fprintf('the %g iteration is %g, the max is %g. the value of objective is %g,diff is %g\n',circleID,getResult(pp,TestY),max(Results),fvalue,diffs);
 end
 tempRes = [Results;lvalues]
 Results = tempRes;
