@@ -51,7 +51,7 @@ for rr=1:length(filedors)
    average = 0.0;
     xlswrite(strcat(wname,'.xls'),[1:1:numCircle]);
     for time=1:iternum
-        Results = LSFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
+        Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
         [res] = xlsread(strcat(wname,'.xls'));
         average = average + max(Results(1,:));
         xlswrite(strcat(wname,'.xls'),[res;Results]);

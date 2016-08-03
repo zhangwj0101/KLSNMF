@@ -1,4 +1,4 @@
-function Results = LSFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle)
+function Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle)
 %%% 联合训练 列为一
 G0 = [];
 for i = 1:length(TrainY)
@@ -68,8 +68,6 @@ for i = 1:size(TestX,2)
     Xt(:,i) = Xt(:,i)/sum(Xt(:,i));
 end
 
-
-
 b = 1/(size(Gs,1));
 %%%Init SS
 SS = ones(size(Fs,2),size(Gs,2));
@@ -100,7 +98,8 @@ v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
 v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
 v3 = alpha*trace(Fs1'*Fs1-2*Fs1'*Ft1+Ft1'*Ft1);
 v4 = alpha*trace(Ss1'*Ss1-2*Ss1'*St1+St1'*St1);
-fvalue = v1+v2+v3+v4;
+v5 = beta *sum(sum(abs(Fs-Ft))) + beta * sum(sum(abs(Ss-St)));
+fvalue = v1+v2+v3+v4 + v5;
 tempf = 0;
 r = 1.5
 for circleID = 1:numCircle
@@ -311,12 +310,13 @@ for circleID = 1:numCircle
    tempSs = [Ss1;Ss];
    tempFt = [Ft1 Ft];
    tempSt = [St1;St];
-   v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
-   v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
-   v3 = alpha*trace(Fs1'*Fs1-2*Fs1'*Ft1+Ft1'*Ft1);
-   v4 = alpha*trace(Ss1'*Ss1-2*Ss1'*St1+St1'*St1);
-   fvalue = v1+v2+v3+v4;
-    tempf = 0;
+  v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
+  v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
+  v3 = alpha*trace(Fs1'*Fs1-2*Fs1'*Ft1+Ft1'*Ft1);
+  v4 = alpha*trace(Ss1'*Ss1-2*Ss1'*St1+St1'*St1);
+  v5 = beta *sum(sum(abs(Fs-Ft))) +beta * sum(sum(abs(Ss-St)));
+  fvalue = v1+v2+v3+v4 + v5;
+   tempf = 0;
     if circleID == 1
         tempf = fvalue;
     end

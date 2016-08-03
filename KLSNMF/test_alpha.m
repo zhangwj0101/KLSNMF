@@ -40,7 +40,7 @@ for rr=1:length(filedors)
         end
     end
     alpha = 1.5;
-    beta = 0.5;
+    beta = 1.5;
     numK = 50;
     numCircle = 180;
     best = [];
@@ -49,7 +49,7 @@ for rr=1:length(filedors)
     wname = strcat(basetypePath,char(filename(size(filename,2))));
     xlswrite(strcat(wname,'.xls'),[1:1:numCircle]);
     for alpha=0:0.5:5
-        Results = LSFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
+        Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
         [res] = xlsread(strcat(wname,'.xls'));
         xlswrite(strcat(wname,'.xls'),[res;Results(1,:)]);
     end
