@@ -33,7 +33,7 @@ for rr=1:length(filedors)
             TrainY(id) = -1;
         end
     end
- 
+    
     for id = 1:length(TestY)
         if TestY(id) == 2
             TestY(id) = -1;
@@ -46,12 +46,13 @@ for rr=1:length(filedors)
     best = [];
     index= 1;
     iternum = 10;
+    similarK = 20;
     filename = regexp(base, '/', 'split');
     wname = char(filename(size(filename,2)));
-   average = 0.0;
+    average = 0.0;
     xlswrite(strcat(wname,'.xls'),[1:1:numCircle]);
     for time=1:iternum
-        Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
+        Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,similarK,numCircle);
         [res] = xlsread(strcat(wname,'.xls'));
         average = average + max(Results(1,:));
         xlswrite(strcat(wname,'.xls'),[res;Results]);
@@ -59,6 +60,7 @@ for rr=1:length(filedors)
     [res] = xlsread(strcat('average.xls'));
     xlswrite(strcat('average.xls'),[res;average/iternum]);
 end
+
 % x = 0:1:numCircle-1;
 % figure
 % plot(x,Results,'r');

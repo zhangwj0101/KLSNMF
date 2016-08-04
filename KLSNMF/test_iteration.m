@@ -46,10 +46,11 @@ for rr=1:length(filedors)
     numCircle = 180;
     best = [];
     index= 1;
+    similarK = 20;
     filename = regexp(base, '/', 'split');
     wname = strcat(basetypePath,char(filename(size(filename,2))));
     xlswrite(strcat(wname,'.xls'),[1:1:numCircle]);
-    Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
+    Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,similarK,numCircle);
     [res] = xlsread(strcat(wname,'.xls'));
     xlswrite(strcat(wname,'.xls'),[res;Results]);
 end

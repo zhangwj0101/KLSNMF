@@ -1,5 +1,5 @@
-function Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle)
-%%% 联合训练 列为一
+function Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,similarK,numCircle)
+
 G0 = [];
 for i = 1:length(TrainY)
     if TrainY(i) == 1
@@ -10,7 +10,8 @@ for i = 1:length(TrainY)
         G0(i,2) = 1;
     end
 end
-K1 = 20;
+Gs = G0;
+
 %%%逻辑回归
 TrainXY = scale_cols(TrainX,TrainY);
 fprintf('......start to train logistic regression model.........\n');
@@ -39,28 +40,11 @@ for i = 1:length(TestY)
     Gt(i,1) = ptemp(i);
     Gt(i,2) = 1 - ptemp(i);
 end
-
 %%%%逻辑回归结束
 
-%%%NMF way
-r = numK;
-all = [TrainX TestX];
-[m,n] = size(all);
-Winit = abs(randn(m,r));
-% Winit = ones(m,r);
-%Hinit = abs(randn(r,n));
-%[W,H] = nmf(full(all),Winit,Hinit,0.0000000000001,25,8000);
-W = Winit;
-for id=1:size(W,2)
-    W(:,id) = W(:,id)/sum(W(:,id));
-end
-%%%%end NMF way
-Fs = W;
-Ft = Fs;
-Gs = G0;
+% 对Xs和Xt进行归一化
 Xs = TrainX;
 Xt = TestX;
-
 for i = 1:size(TrainX,2)
     Xs(:,i) = Xs(:,i)/sum(Xs(:,i));
 end
@@ -68,223 +52,207 @@ for i = 1:size(TestX,2)
     Xt(:,i) = Xt(:,i)/sum(Xt(:,i));
 end
 
-b = 1/(size(Gs,1));
+%F,S随机初始化开始
+W = abs(randn(size(TrainX,1),numK));
+for id=1:size(W,2)
+    W(:,id) = W(:,id)/sum(W(:,id));
+end
+%%%Fss,Fsd
+Fss = W(:,1:similarK);
+Fsd = W(:,similarK+1:size(W,2));
+Fts = Fss;
+Ftd = Fsd;
+
 %%%Init SS
-SS = ones(size(Fs,2),size(Gs,2));
+SS = ones(size(W,2),size(Gs,2));
 for i = 1:size(SS,1)
     SS(i,:) = SS(i,:)/sum(SS(i,:));
 end
-Ss = SS;
-St = SS;
+%%%Sss,Ssd
+Sss = SS(1:similarK,:);
+Ssd = SS(similarK+1:size(SS,1),:);
+Sts = Sss;
+Std = Ssd;
 
-%%%Fs1,Fs,Ss1,Ss
-Fs1 = W(:,1:K1);
-Fs = W(:,K1+1:size(W,2));
-Ft1 = Fs1;
-Ft = Fs;
-
-Ss1 = SS(1:K1,:);
-Ss = SS(K1+1:size(SS,1),:);
-St1 = Ss1;
-St = Ss;
-
-tempFs = [Fs1 Fs];
-tempSs = [Ss1;Ss];
-tempFt = [Ft1 Ft];
-tempSt = [St1;St];
-
-fvalue = 0;
+tempFs = [Fss Fsd];
+tempSs = [Sss;Ssd];
+tempFt = [Fts Ftd];
+tempSt = [Sts;Std];
 v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
 v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
-v3 = alpha*trace(Fs1'*Fs1-2*Fs1'*Ft1+Ft1'*Ft1);
-v4 = alpha*trace(Ss1'*Ss1-2*Ss1'*St1+St1'*St1);
-v5 = beta *sum(sum(abs(Fs-Ft))) + beta * sum(sum(abs(Ss-St)));
+v3 = alpha*trace(Fss'*Fss-2*Fss'*Fts+Fts'*Fts);
+v4 = alpha*trace(Sss'*Sss-2*Sss'*Sts+Sts'*Sts);
+v5 = beta *sum(sum(abs(Fsd-Ftd))) + beta * sum(sum(abs(Ssd-Std)));
 fvalue = v1+v2+v3+v4 + v5;
 tempf = 0;
-r = 1.5
+% 开始进行迭代
 for circleID = 1:numCircle
     
-    %%%Fs1,Fs,Ss1,Ss
-    %%%Fs1
-    tempM = (Fs1*Ss1+Fs*Ss)*(Gs'*Gs)*Ss1' + alpha*Fs1;
-    tempM1 = (Xs*Gs)*Ss1' + alpha*Ft1;
-    for i = 1:size(Fs1,1)
-        for j = 1:size(Fs1,2)
+    %%%Fss
+    tempM = (Fss*Sss+Fsd*Ssd)*(Gs'*Gs)*Sss' + alpha*Fss;
+    tempM1 = (Xs*Gs)*Sss' + alpha*Fts;
+    for i = 1:size(Fss,1)
+        for j = 1:size(Fss,2)
             if tempM(i,j)~=0
-                Fs1(i,j) = Fs1(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Fss(i,j) = Fss(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
             else
-                Fs1(i,j) = 0;
+                Fss(i,j) = 0;
             end
         end
     end
-    for i = 1:size(Fs1,2)
-        if sum(Fs1(:,i))~= 0
-            Fs1(:,i) = Fs1(:,i)/sum(Fs1(:,i));
+    for i = 1:size(Fss,2)
+        if sum(Fss(:,i))~= 0
+            Fss(:,i) = Fss(:,i)/sum(Fss(:,i));
         else
-            for j = 1:size(Fs1,2)
-                Fs1(i,j) = 1/(size(Fs1,2));
+            for j = 1:size(Fss,2)
+                Fss(i,j) = 1/(size(Fss,2));
             end
         end
     end
-    
-    %%Ss1
-    tempM = Fs1'*(Fs1*Ss1+ Fs*Ss)*(Gs'*Gs) + alpha *Ss1;
-    tempM1 = Fs1'*(Xs*Gs) + alpha*St1;
-    for i = 1:size(Ss1,1)
-        for j = 1:size(Ss1,2)
+    %%Sss
+    tempM = Fss'*(Fss*Sss+ Fsd*Ssd)*(Gs'*Gs) + alpha *Sss;
+    tempM1 = Fss'*(Xs*Gs) + alpha*Sts;
+    for i = 1:size(Sss,1)
+        for j = 1:size(Sss,2)
             if tempM(i,j)~=0
-                Ss1(i,j) = Ss1(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Sss(i,j) = Sss(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
             else
-                Ss1(i,j) = 0;
+                Sss(i,j) = 0;
             end
         end
     end
     
-    %%Fs
-    tempM = 2*(Fs*Ss)*(Gs'*Gs)*Ss';
-    tempM1 = 2*(Xs-Fs1*Ss1*Gs')*Gs*Ss';
-    for i = 1:size(Fs,1)
-        for j = 1:size(Fs,2)
-            if Fs(i,j) > Ft(i,j)
+    %%Fsd
+    tempM = 2*(Fsd*Ssd)*(Gs'*Gs)*Ssd';
+    tempM1 = 2*(Xs-Fss*Sss*Gs')*Gs*Ssd';
+    for i = 1:size(Fsd,1)
+        for j = 1:size(Fsd,2)
+            if Fsd(i,j) > Ftd(i,j)
                 gradient = 1;
             else
                 gradient = -1;
             end
-            tempMu = tempM(i,j) +r*gradient;
+            tempMu = tempM(i,j) +beta*gradient;
             if tempMu > 0
-                Fs(i,j) = Fs(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+                Fsd(i,j) = Fsd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
-                Fs(i,j) = 0;
+                Fsd(i,j) = 0;
             end
         end
     end
-    for i = 1:size(Fs,2)
-        if sum(Fs(:,i))~= 0
-            Fs(:,i) = Fs(:,i)/sum(Fs(:,i));
+    for i = 1:size(Fsd,2)
+        if sum(Fsd(:,i))~= 0
+            Fsd(:,i) = Fsd(:,i)/sum(Fsd(:,i));
         else
-            for j = 1:size(Fs,2)
-                Fs(i,j) = 1/(size(Fs,2));
+            for j = 1:size(Fsd,2)
+                Fsd(i,j) = 1/(size(Fsd,2));
             end
         end
     end
     
-%     tempDiff = Ss-St;
-%     tempDiff(find(tempDiff >= 0)) = 1;
-%     tempDiff(find(tempDiff < 0)) = -1;
-%     sd = Xs-Fs1*Ss1*Gs';
-    %%Ss
-    tempM = 2*(Fs'*(Fs*Ss)*Gs'*Gs);
-    tempM1 = 2*Fs'*( Xs-Fs1*Ss1*Gs')*Gs;
-    for i = 1:size(Ss,1)
-        for j = 1:size(Ss,2)
-            if Ss(i,j) >= St(i,j)
-                gradient = 1;
-            else
-                 gradient = -1;
-            end
-            tempMu = tempM(i,j) + r*gradient;
-            if tempMu > 0
-                Ss(i,j) = Ss(i,j)*(tempM1(i,j)/tempMu)^(0.5);
-            else
-                Ss(i,j) = 0;
-            end
-        end
-    end
-    
-    %%  Ft1
-    tempM = (Ft1*St1+Ft*St)*Gt'*Gt*St1' + alpha*Ft1;
-    tempM1 = Xt*Gt*St1'+alpha*Fs1;
-    for i = 1:size(Ft1,1)
-        for j = 1:size(Ft1,2)
-            if tempM(i,j)~=0
-                Ft1(i,j) = Ft1(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
-            else
-                Ft1(i,j) =0;
-            end
-        end
-    end
-    for i = 1:size(Ft1,2)
-        if sum(Ft1(:,i))~= 0
-            Ft1(:,i) = Ft1(:,i)/sum(Ft1(:,i));
-        else
-            for j = 1:size(Ft1,2)
-                Ft1(i,j) = 1/(size(Ft1,2));
-            end
-        end
-    end
-    
-    %%St1
-    %%将Ss直接给St然后再迭代操作
-    %     St = Ss;
-    %%%新加
-    tempM = Ft1'*(Ft1*St1+Ft*St)*Gt'*Gt + alpha * St1;
-    tempM1 = Ft1'*Xt*Gt + alpha*Ss1;
-    for i = 1:size(St1,1)
-        for j = 1:size(St1,2)
-            if tempM(i,j)~=0
-                St1(i,j) = St1(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
-            else
-                St1(i,j) = 0;
-            end
-        end
-    end
-    
-    
-    %%  Ft
-    tempM = 2*(Ft*St)*Gt'*Gt*St';
-    tempM1 = 2*(Xt-Ft1*St1*Gt')*Gt*St';
-    for i = 1:size(Ft,1)
-        for j = 1:size(Ft,2)
-            if Ft(i,j) > Fs(i,j)
+    %%Ssd
+    tempM = 2*(Fsd'*(Fsd*Ssd)*Gs'*Gs);
+    tempM1 = 2*Fsd'*( Xs-Fss*Sss*Gs')*Gs;
+    for i = 1:size(Ssd,1)
+        for j = 1:size(Ssd,2)
+            if Ssd(i,j) >= Std(i,j)
                 gradient = 1;
             else
                 gradient = -1;
             end
-            tempMu = tempM(i,j) + r*gradient;
+            tempMu = tempM(i,j) + beta*gradient;
             if tempMu > 0
-                Ft(i,j) = Ft(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+                Ssd(i,j) = Ssd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
-                Ft(i,j) =0;
-            end
-        end
-    end
-    for i = 1:size(Ft,2)
-        if sum(Ft(:,i))~= 0
-            Ft(:,i) = Ft(:,i)/sum(Ft(:,i));
-        else
-            for j = 1:size(Ft,2)
-                Ft(i,j) = 1/(size(Ft,2));
+                Ssd(i,j) = 0;
             end
         end
     end
     
-    %%St
-    %%将Ss直接给St然后再迭代操作
-    %     St = Ss;
-    %%%新加
-%     tempDiff = St-Ss;
-%     tempDiff(find(tempDiff >= 0)) = 1;
-%     tempDiff(find(tempDiff < 0)) = -1;
-    tempM = 2*Ft'*(Ft*St)*Gt'*Gt;
-    tempM1 = 2*Ft'*(Xt-Ft1*St1*Gt')*Gt;
-    for i = 1:size(St,1)
-        for j = 1:size(St,2)
-             if St(i,j) >= Ss(i,j)
+    %%  Fts
+    tempM = (Fts*Sts+Ftd*Std)*Gt'*Gt*Sts' + alpha*Fts;
+    tempM1 = Xt*Gt*Sts'+alpha*Fss;
+    for i = 1:size(Fts,1)
+        for j = 1:size(Fts,2)
+            if tempM(i,j)~=0
+                Fts(i,j) = Fts(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+            else
+                Fts(i,j) =0;
+            end
+        end
+    end
+    for i = 1:size(Fts,2)
+        if sum(Fts(:,i))~= 0
+            Fts(:,i) = Fts(:,i)/sum(Fts(:,i));
+        else
+            for j = 1:size(Fts,2)
+                Fts(i,j) = 1/(size(Fts,2));
+            end
+        end
+    end
+    
+    %%Sts
+    tempM = Fts'*(Fts*Sts+Ftd*Std)*Gt'*Gt + alpha * Sts;
+    tempM1 = Fts'*Xt*Gt + alpha*Sss;
+    for i = 1:size(Sts,1)
+        for j = 1:size(Sts,2)
+            if tempM(i,j)~=0
+                Sts(i,j) = Sts(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+            else
+                Sts(i,j) = 0;
+            end
+        end
+    end
+    
+    %%  Ftd
+    tempM = 2*(Ftd*Std)*Gt'*Gt*Std';
+    tempM1 = 2*(Xt-Fts*Sts*Gt')*Gt*Std';
+    for i = 1:size(Ftd,1)
+        for j = 1:size(Ftd,2)
+            if Ftd(i,j) > Fsd(i,j)
                 gradient = 1;
             else
-                 gradient = -1;
+                gradient = -1;
             end
-            tempMu = tempM(i,j) + r*gradient;
+            tempMu = tempM(i,j) + beta*gradient;
             if tempMu > 0
-                St(i,j) = St(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+                Ftd(i,j) = Ftd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
-                St(i,j) = 0;
+                Ftd(i,j) =0;
+            end
+        end
+    end
+    for i = 1:size(Ftd,2)
+        if sum(Ftd(:,i))~= 0
+            Ftd(:,i) = Ftd(:,i)/sum(Ftd(:,i));
+        else
+            for j = 1:size(Ftd,2)
+                Ftd(i,j) = 1/(size(Ftd,2));
+            end
+        end
+    end
+    
+    %%Std
+    tempM = 2*Ftd'*(Ftd*Std)*Gt'*Gt;
+    tempM1 = 2*Ftd'*(Xt-Fts*Sts*Gt')*Gt;
+    for i = 1:size(Std,1)
+        for j = 1:size(Std,2)
+            if Std(i,j) >= Ssd(i,j)
+                gradient = 1;
+            else
+                gradient = -1;
+            end
+            tempMu = tempM(i,j) + beta*gradient;
+            if tempMu > 0
+                Std(i,j) = Std(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+            else
+                Std(i,j) = 0;
             end
         end
     end
     
     %% Gt
-    tempFS = Ft1*St1+Ft*St;
+    tempFS = Fts*Sts+Ftd*Std;
     tempM = (Gt*tempFS'*tempFS);
     tempM1 = Xt'*tempFS;
     for i = 1:size(Gt,1)
@@ -306,17 +274,17 @@ for circleID = 1:numCircle
         end
     end
     
-   tempFs = [Fs1 Fs];
-   tempSs = [Ss1;Ss];
-   tempFt = [Ft1 Ft];
-   tempSt = [St1;St];
-  v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
-  v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
-  v3 = alpha*trace(Fs1'*Fs1-2*Fs1'*Ft1+Ft1'*Ft1);
-  v4 = alpha*trace(Ss1'*Ss1-2*Ss1'*St1+St1'*St1);
-  v5 = beta *sum(sum(abs(Fs-Ft))) +beta * sum(sum(abs(Ss-St)));
-  fvalue = v1+v2+v3+v4 + v5;
-   tempf = 0;
+    tempFs = [Fss Fsd];
+    tempSs = [Sss;Ssd];
+    tempFt = [Fts Ftd];
+    tempSt = [Sts;Std];
+    v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
+    v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
+    v3 = alpha*trace(Fss'*Fss-2*Fss'*Fts+Fts'*Fts);
+    v4 = alpha*trace(Sss'*Sss-2*Sss'*Sts+Sts'*Sts);
+    v5 = beta *sum(sum(abs(Fsd-Ftd))) + beta * sum(sum(abs(Ssd-Std)));
+    fvalue = v1+v2+v3+v4 + v5;
+    tempf = 0;
     if circleID == 1
         tempf = fvalue;
     end
@@ -342,12 +310,3 @@ for circleID = 1:numCircle
 end
 tempRes = [Results;lvalues]
 Results = tempRes;
-
-% [res] = xlsread(strcat('iteration_F.xls'));
-% xlswrite(strcat('iteration_F.xls'),[res;Results;lvalues]);
-% x = 0:1:numCircle-1;
-% figure
-% plot(x,lvalues,'r');
-% grid on
-% xlabel('x');
-% ylabel('Results');
