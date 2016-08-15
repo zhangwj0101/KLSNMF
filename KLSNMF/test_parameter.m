@@ -31,5 +31,18 @@ similarK = 20;
 numCircle = 180;
 best = [];
 index= 1;
-Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta,numK,similarK,numCircle);
+xlswrite(strcat('paramter.xls'),['a','b','g','d','m']);
+
+for alpha=1:0.5:3
+    for beta=1:0.5:3
+        for gamma=1:0.5:3
+            for delta=1:0.5:3
+                Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta,numK,similarK,numCircle);
+                [res] = xlsread(strcat('paramter.xls'));
+                temp = [alpha,beta,gamma,delta,max(Results(1,:))];
+                xlswrite(strcat('paramter.xls'),[res;temp]);
+            end
+        end
+    end
+end
 

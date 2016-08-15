@@ -41,6 +41,8 @@ for rr=1:length(filedors)
     end
     alpha = 1.5;
     beta = 0.5;
+    gamma = 1.5;
+    delta = 1.5;
     numK = 50;
     numCircle = 180;
     best = [];
@@ -52,7 +54,7 @@ for rr=1:length(filedors)
     average = 0.0;
     xlswrite(strcat(wname,'.xls'),[1:1:numCircle]);
     for time=1:iternum
-        Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,similarK,numCircle);
+        Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta,numK,similarK,numCircle);
         [res] = xlsread(strcat(wname,'.xls'));
         average = average + max(Results(1,:));
         xlswrite(strcat(wname,'.xls'),[res;Results]);

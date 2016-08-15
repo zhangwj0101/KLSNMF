@@ -1,4 +1,4 @@
-function Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,numK,similarK,numCircle)
+function Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta ,numK,similarK,numCircle)
 
 G0 = [];
 for i = 1:length(TrainY)
@@ -81,9 +81,9 @@ tempSt = [Sts;Std];
 v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
 v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
 v3 = alpha*trace(Fss'*Fss-2*Fss'*Fts+Fts'*Fts);
-v4 = alpha*trace(Sss'*Sss-2*Sss'*Sts+Sts'*Sts);
-v5 = beta *sum(sum(abs(Fsd-Ftd))) + beta * sum(sum(abs(Ssd-Std)));
-fvalue = v1+v2+v3+v4 + v5;
+v4 = beta*trace(Sss'*Sss-2*Sss'*Sts+Sts'*Sts);
+v5 = gamma *sum(sum(abs(Fsd-Ftd))) + delta * sum(sum(abs(Ssd-Std)));
+fvalue = v1+v2+v3+v4+v5;
 tempf = 0;
 % 开始进行迭代
 for circleID = 1:numCircle
@@ -110,8 +110,8 @@ for circleID = 1:numCircle
         end
     end
     %%Sss
-    tempM = Fss'*(Fss*Sss+ Fsd*Ssd)*(Gs'*Gs) + alpha *Sss;
-    tempM1 = Fss'*(Xs*Gs) + alpha*Sts;
+    tempM = Fss'*(Fss*Sss+ Fsd*Ssd)*(Gs'*Gs) + beta *Sss;
+    tempM1 = Fss'*(Xs*Gs) + beta*Sts;
     for i = 1:size(Sss,1)
         for j = 1:size(Sss,2)
             if tempM(i,j)~=0
@@ -132,7 +132,7 @@ for circleID = 1:numCircle
             else
                 gradient = -1;
             end
-            tempMu = tempM(i,j) +beta*gradient;
+            tempMu = tempM(i,j) +gamma*gradient;
             if tempMu > 0
                 Fsd(i,j) = Fsd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -160,7 +160,7 @@ for circleID = 1:numCircle
             else
                 gradient = -1;
             end
-            tempMu = tempM(i,j) + beta*gradient;
+            tempMu = tempM(i,j) + delta*gradient;
             if tempMu > 0
                 Ssd(i,j) = Ssd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -192,8 +192,8 @@ for circleID = 1:numCircle
     end
     
     %%Sts
-    tempM = Fts'*(Fts*Sts+Ftd*Std)*Gt'*Gt + alpha * Sts;
-    tempM1 = Fts'*Xt*Gt + alpha*Sss;
+    tempM = Fts'*(Fts*Sts+Ftd*Std)*Gt'*Gt + beta * Sts;
+    tempM1 = Fts'*Xt*Gt + beta*Sss;
     for i = 1:size(Sts,1)
         for j = 1:size(Sts,2)
             if tempM(i,j)~=0
@@ -214,7 +214,7 @@ for circleID = 1:numCircle
             else
                 gradient = -1;
             end
-            tempMu = tempM(i,j) + beta*gradient;
+            tempMu = tempM(i,j) + gamma*gradient;
             if tempMu > 0
                 Ftd(i,j) = Ftd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -242,7 +242,7 @@ for circleID = 1:numCircle
             else
                 gradient = -1;
             end
-            tempMu = tempM(i,j) + beta*gradient;
+            tempMu = tempM(i,j) + delta*gradient;
             if tempMu > 0
                 Std(i,j) = Std(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -281,8 +281,8 @@ for circleID = 1:numCircle
     v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
     v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
     v3 = alpha*trace(Fss'*Fss-2*Fss'*Fts+Fts'*Fts);
-    v4 = alpha*trace(Sss'*Sss-2*Sss'*Sts+Sts'*Sts);
-    v5 = beta *sum(sum(abs(Fsd-Ftd))) + beta * sum(sum(abs(Ssd-Std)));
+    v4 = beta*trace(Sss'*Sss-2*Sss'*Sts+Sts'*Sts);
+    v5 = gamma *sum(sum(abs(Fsd-Ftd))) + delta * sum(sum(abs(Ssd-Std)));
     fvalue = v1+v2+v3+v4 + v5;
     tempf = 0;
     if circleID == 1
