@@ -1,5 +1,5 @@
 function Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta ,numK,similarK,numCircle)
-
+similarK =  int32(similarK);
 G0 = [];
 for i = 1:length(TrainY)
     if TrainY(i) == 1

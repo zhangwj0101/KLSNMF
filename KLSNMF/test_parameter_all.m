@@ -1,5 +1,5 @@
 
-str = 'E:\cls-acl10-processed_cutshortdoc\test_iteration/';
+str = 'C:\mydata_add_withtraintest_cutshortdoc_for_wdq/';
 
 basetypePath='iteration/';
 FileList=dir(str);
@@ -11,15 +11,17 @@ for rr=1:length(FileList)
     end
 end
 xlswrite(strcat('dirs.xls'),filedors');
-xlswrite(strcat('paramter.xls'),['a','b','g','d','k','m']);
+xlswrite(strcat('paramter.csv'),['a','b','g','d','k','m']);
 numK = 50;
 numCircle = 180;
 for tie=1:1:30
-    alpha  =10*rand();
-    beta = 10*rand();
-    gamma = 10*rand();
-    delta = 10*rand();
-    similarK = int32(numK*rand());
+    alpha  =getRand(0.5,10);
+    beta = getRand(0.5,10);
+    gamma = getRand(0.5,10);
+    delta = getRand(0.5,10);
+    similarK = getRand(10,numK);
+    [alpha,beta,gamma,delta,similarK]
+    index= 1;
     for rr=1:length(filedors)
         base = filedors{rr};
         trainPath = strcat(base,'/Train.data');
@@ -51,10 +53,12 @@ for tie=1:1:30
         end
         
         Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta,numK,similarK,numCircle);
-        [res] = xlsread(strcat('paramter.xls'));
-        temp = [alpha,beta,gamma,delta,similarK,max(Results(1,:))];
-        xlswrite(strcat('paramter.xls'),[res;temp]);
+        lvalues(index) = max(Results(1,:));
+        index = index+1;
     end
+    [res] = xlsread(strcat('paramter.xls'));
+    temp = [alpha,beta,gamma,delta,similarK,lvalues];
+    xlswrite(strcat('paramter.xls'),[res;temp]);
 end
 
 
