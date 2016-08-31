@@ -10,8 +10,8 @@ for rr=1:length(FileList)
         ff= ff+1;
     end
 end
-xlswrite(strcat('dirs.xls'),filedors');
-xlswrite(strcat('paramter.csv'),['a','b','g','d','k','m']);
+% csvwrite(strcat('dirs.csv'),filedors');
+csvwrite(strcat('paramter.csv'),[0,1,2,3,4,5]);
 numK = 50;
 numCircle = 180;
 for tie=1:1:30
@@ -56,9 +56,9 @@ for tie=1:1:30
         lvalues(index) = max(Results(1,:));
         index = index+1;
     end
-    [res] = xlsread(strcat('paramter.xls'));
+    [res] = csvread(strcat('paramter.csv'));
     temp = [alpha,beta,gamma,delta,similarK,lvalues];
-    xlswrite(strcat('paramter.xls'),[res;temp]);
+    csvwrite(strcat('paramter.csv'),[res;temp]);
 end
 
 
