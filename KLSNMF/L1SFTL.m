@@ -1,6 +1,16 @@
 function Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta ,numK,similarK,numCircle)
-similarK =  int32(similarK);
+similarK = int32(similarK);
 G0 = [];
+constant = 5;
+weights = 250;
+weightd = 5;
+weightt = 20;
+% xlswrite(strcat('Fs.xlsx'),[0]);
+% xlswrite(strcat('Ss.xlsx'),[0]);
+% xlswrite(strcat('Ft.xlsx'),[0]);
+% xlswrite(strcat('St.xlsx'),[0]);
+% xlswrite(strcat('Gt.xlsx'),[0]);
+% return;
 for i = 1:length(TrainY)
     if TrainY(i) == 1
         G0(i,1) = 1;
@@ -89,12 +99,12 @@ tempf = 0;
 for circleID = 1:numCircle
     
     %%%Fss
-    tempM = (Fss*Sss+Fsd*Ssd)*(Gs'*Gs)*Sss' + alpha*Fss;
+    tempM = (Fss*Sss+Fsd*Ssd)*(Gs'*Gs)*Sss' + alpha*Fss ;
     tempM1 = (Xs*Gs)*Sss' + alpha*Fts;
     for i = 1:size(Fss,1)
         for j = 1:size(Fss,2)
             if tempM(i,j)~=0
-                Fss(i,j) = Fss(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Fss(i,j) = Fss(i,j)*((tempM1(i,j)/tempM(i,j))^(0.5)+weights)/(weights+1);
             else
                 Fss(i,j) = 0;
             end
@@ -115,7 +125,7 @@ for circleID = 1:numCircle
     for i = 1:size(Sss,1)
         for j = 1:size(Sss,2)
             if tempM(i,j)~=0
-                Sss(i,j) = Sss(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Sss(i,j) = Sss(i,j)*((tempM1(i,j)/tempM(i,j))^(0.5)+ weights)/(1+weights);
             else
                 Sss(i,j) = 0;
             end
@@ -123,8 +133,8 @@ for circleID = 1:numCircle
     end
     
     %%Fsd
-    tempM = 2*(Fsd*Ssd)*(Gs'*Gs)*Ssd';
-    tempM1 = 2*(Xs-Fss*Sss*Gs')*Gs*Ssd';
+    tempM = 2*(Fsd*Ssd)*(Gs'*Gs)*Ssd'+constant;
+    tempM1 = 2*(Xs-Fss*Sss*Gs')*Gs*Ssd'+constant;
     for i = 1:size(Fsd,1)
         for j = 1:size(Fsd,2)
             if Fsd(i,j) > Ftd(i,j)
@@ -134,7 +144,7 @@ for circleID = 1:numCircle
             end
             tempMu = tempM(i,j) +gamma*gradient;
             if tempMu > 0
-                Fsd(i,j) = Fsd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+                Fsd(i,j) = Fsd(i,j)*((tempM1(i,j)/tempMu)^(0.5)+weightd)/(1+weightd);
             else
                 Fsd(i,j) = 0;
             end
@@ -151,8 +161,8 @@ for circleID = 1:numCircle
     end
     
     %%Ssd
-    tempM = 2*(Fsd'*(Fsd*Ssd)*Gs'*Gs);
-    tempM1 = 2*Fsd'*( Xs-Fss*Sss*Gs')*Gs;
+    tempM = 2*(Fsd'*(Fsd*Ssd)*Gs'*Gs)+constant;
+    tempM1 = 2*Fsd'*( Xs-Fss*Sss*Gs')*Gs+constant;
     for i = 1:size(Ssd,1)
         for j = 1:size(Ssd,2)
             if Ssd(i,j) >= Std(i,j)
@@ -162,7 +172,7 @@ for circleID = 1:numCircle
             end
             tempMu = tempM(i,j) + delta*gradient;
             if tempMu > 0
-                Ssd(i,j) = Ssd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+                Ssd(i,j) = Ssd(i,j)*((tempM1(i,j)/tempMu)^(0.5)+weightd)/(1+weightd);
             else
                 Ssd(i,j) = 0;
             end
@@ -175,7 +185,7 @@ for circleID = 1:numCircle
     for i = 1:size(Fts,1)
         for j = 1:size(Fts,2)
             if tempM(i,j)~=0
-                Fts(i,j) = Fts(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Fts(i,j) = Fts(i,j)*((tempM1(i,j)/tempM(i,j))^(0.5)+weights)/(1+weights);
             else
                 Fts(i,j) =0;
             end
@@ -197,7 +207,7 @@ for circleID = 1:numCircle
     for i = 1:size(Sts,1)
         for j = 1:size(Sts,2)
             if tempM(i,j)~=0
-                Sts(i,j) = Sts(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Sts(i,j) = Sts(i,j)*((tempM1(i,j)/tempM(i,j))^(0.5)+weights)/(1+weights);
             else
                 Sts(i,j) = 0;
             end
@@ -205,8 +215,8 @@ for circleID = 1:numCircle
     end
     
     %%  Ftd
-    tempM = 2*(Ftd*Std)*Gt'*Gt*Std';
-    tempM1 = 2*(Xt-Fts*Sts*Gt')*Gt*Std';
+    tempM = 2*(Ftd*Std)*Gt'*Gt*Std'+constant;
+    tempM1 = 2*(Xt-Fts*Sts*Gt')*Gt*Std'+constant;
     for i = 1:size(Ftd,1)
         for j = 1:size(Ftd,2)
             if Ftd(i,j) > Fsd(i,j)
@@ -216,7 +226,7 @@ for circleID = 1:numCircle
             end
             tempMu = tempM(i,j) + gamma*gradient;
             if tempMu > 0
-                Ftd(i,j) = Ftd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+                Ftd(i,j) = Ftd(i,j)*((tempM1(i,j)/tempMu)^(0.5)+weightd)/(1+weightd);
             else
                 Ftd(i,j) =0;
             end
@@ -233,8 +243,8 @@ for circleID = 1:numCircle
     end
     
     %%Std
-    tempM = 2*Ftd'*(Ftd*Std)*Gt'*Gt;
-    tempM1 = 2*Ftd'*(Xt-Fts*Sts*Gt')*Gt;
+    tempM = 2*Ftd'*(Ftd*Std)*Gt'*Gt+constant;
+    tempM1 = 2*Ftd'*(Xt-Fts*Sts*Gt')*Gt+constant;
     for i = 1:size(Std,1)
         for j = 1:size(Std,2)
             if Std(i,j) >= Ssd(i,j)
@@ -244,7 +254,7 @@ for circleID = 1:numCircle
             end
             tempMu = tempM(i,j) + delta*gradient;
             if tempMu > 0
-                Std(i,j) = Std(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+                Std(i,j) = Std(i,j)*((tempM1(i,j)/tempMu)^(0.5)+weightd)/(1+weightd);
             else
                 Std(i,j) = 0;
             end
@@ -258,7 +268,7 @@ for circleID = 1:numCircle
     for i = 1:size(Gt,1)
         for j = 1:size(Gt,2)
             if tempM(i,j)~=0
-                Gt(i,j) = Gt(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Gt(i,j) = Gt(i,j)*((tempM1(i,j)/tempM(i,j))^(0.5)+weightt)/(1+weightt);
             else
                 Gt(i,j) = 0;
             end
@@ -278,6 +288,18 @@ for circleID = 1:numCircle
     tempSs = [Sss;Ssd];
     tempFt = [Fts Ftd];
     tempSt = [Sts;Std];
+    
+%     [res] = xlsread(strcat('Fs.xlsx'));
+%     xlswrite(strcat('Fs.xlsx'),[res;tempFs]);
+%     [res] = xlsread(strcat('Ss.xlsx'));
+%     xlswrite(strcat('Ss.xlsx'),[res tempSs]);
+%     [res] = xlsread(strcat('Ft.xlsx'));
+%     xlswrite(strcat('Ft.xlsx'),[res;tempFt]);
+%     [res] = xlsread(strcat('St.xlsx'));
+%     xlswrite(strcat('St.xlsx'),[res tempSt]);
+%     [res] = xlsread(strcat('Gt.xlsx'));
+%     xlswrite(strcat('Gt.xlsx'),[res Gt]);
+    
     v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
     v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
     v3 = alpha*trace(Fss'*Fss-2*Fss'*Fts+Fts'*Fts);
