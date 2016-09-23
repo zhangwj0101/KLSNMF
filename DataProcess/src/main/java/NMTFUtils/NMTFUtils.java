@@ -21,7 +21,68 @@ public class NMTFUtils {
         //一定要把原领域的test加入到训练集中,论文中的实验是4000天训练数据
         //join();
 //        batch();
+        buildfor20newsgroup();
     }
+
+
+    /**
+     * 用于构建20newsgroup
+     *
+     * @throws Exception
+     */
+    public static void buildfor20newsgroup() throws Exception {
+        String trainPath = "C:\\TTL\\train\\train.dats1";
+        String imediatePath = "C:\\TTL\\imedate\\imedate.dats1";
+        String testPath = "C:\\TTL\\test\\test.dats1";
+
+//        String trainPath = "C:\\cls-acl10-processed\\en\\books\\train.processed.dat";
+//        String imediatePath = "C:\\cls-acl10-processed\\en\\dvd\\train.processed.dat";
+//        String testPath = "C:\\cls-acl10-processed\\en\\music\\test.processed.dat";
+        Map<String, tfidfDocument> train = TFIDF.readFille(trainPath);
+        Map<String, tfidfDocument> imedate = TFIDF.readFille(imediatePath);
+        Map<String, tfidfDocument> cnTest = TFIDF.readFille(testPath);
+
+        Map<String, Integer> cnDic = TFIDF.initDic(new String[]{
+                trainPath, testPath});
+        Map<String, Integer> trainDic = TFIDF.initDic(new String[]{
+                trainPath});
+        Map<String, Integer> testDic = TFIDF.initDic(new String[]{
+                testPath});
+
+        Set<String> commonWords = new HashSet<>();
+        commonWords.addAll(trainDic.keySet());
+        commonWords.addAll(testDic.keySet());
+
+        Iterator<String> iterator = commonWords.iterator();
+        while (iterator.hasNext()) {
+            String temp = iterator.next();
+            if (trainDic.containsKey(temp) && testDic.containsKey(temp)) {
+            } else {
+                iterator.remove();
+            }
+        }
+        trainDic.clear();
+        trainDic.putAll(cnDic);
+        testDic.clear();
+        testDic.putAll(cnDic);
+//        for (String in : commonWords) {
+//            trainDic.remove(in);
+//            testDic.remove(in);
+//        }
+
+        String bestTrain = "c:/NMTFUtils/Train.data";
+        String bestlabel = "c:/NMTFUtils/Train.label";
+        String imediateTrain = "c:/NMTFUtils/imediate.data";
+        String imediatelabel = "c:/NMTFUtils/imediate.label";
+        String test = "c:/NMTFUtils/Test.data";
+        String testlabel = "c:/NMTFUtils/Test.label";
+
+        TFIDF.saveDocsAsTFIDFFOR_NMTF(bestTrain, bestlabel, train, trainDic);
+        TFIDF.saveDocsAsTFIDFFOR_NMTF(imediateTrain, imediatelabel, imedate, cnDic);
+        TFIDF.saveDocsAsTFIDFFOR_NMTF(test, testlabel, cnTest, testDic);
+
+    }
+
 
     /**
      * 转换book music dvd 到SVM需要的格式
@@ -73,7 +134,7 @@ public class NMTFUtils {
 
         // 初始化字典
         Map<String, Integer> Dic = TFIDF.initDicWithoutStopWord(new String[]{
-            trainPath, testpath}, sets);
+                trainPath, testpath}, sets);
 
         // 初始化训练语料
         Map<String, tfidfDocument> cnTest = TFIDF.readFille(testpath);
@@ -257,7 +318,7 @@ public class NMTFUtils {
         String testPath = "C:\\cls-acl10-processed\\de\\music\\trans\\en\\music\\test.processed.dat";
         // 初始化字典
         Map<String, Integer> cnDic = TFIDF.initDic(new String[]{
-            trainPath, testPath});
+                trainPath, testPath});
         System.out.println("词典长度 : " + cnDic.size());
         PrintStream ps = new PrintStream("c:/dict.dat");
         Set<Map.Entry<String, Integer>> entries = cnDic.entrySet();
@@ -349,8 +410,8 @@ public class NMTFUtils {
 
         // 初始化字典
         Map<String, Integer> cnDic = TFIDF.initDicWithoutStopWord(new String[]{
-            trainPath,
-            testpath}, sets);
+                trainPath,
+                testpath}, sets);
 
         // 初始化训练语料
         Map<String, tfidfDocument> cnTest = TFIDF.readFille(testpath);
@@ -358,8 +419,8 @@ public class NMTFUtils {
         Map<String, tfidfDocument> Train = TFIDF.readFille(trainPath);
 
         String[] cnTestPath = {"C:/tmp/",
-                               "model.dat", "train.dat",
-                               "test_rand.dat", "result.dat"};
+                "model.dat", "train.dat",
+                "test_rand.dat", "result.dat"};
         TFIDF.saveDocsAsSVM(cnTestPath[0] + cnTestPath[2], Train, cnDic);
         TFIDF.saveDocsAsSVM(cnTestPath[0] + cnTestPath[3], cnTest, cnDic);
         result = runTestLinear(cnTestPath, null, true, 1);
@@ -395,21 +456,21 @@ public class NMTFUtils {
                                         boolean train, int randNum) throws Exception {
         if (train) {
             String[] argv1 = {"-s", "0", "-c", "1.0", args[0] + args[2], // train
-                              args[0] + args[1] // model
-        };
+                    args[0] + args[1] // model
+            };
             Train.main(argv1);
             System.out.println("SVM model training is Done!  " + args[0]
-                               + args[2]);
+                    + args[2]);
         }
 
         String[] argv2 = {"-b", "1", args[0] + args[3], // test
-                          args[0] + args[1], // model
-                          args[0] + args[4] // output
-    };// usage: svm_predict [options] test_file model_file output_file
+                args[0] + args[1], // model
+                args[0] + args[4] // output
+        };// usage: svm_predict [options] test_file model_file output_file
 
         double result = Predict.main(argv2, resultPath);
         System.out.println("SVM model prediction is Done!  " + args[0]
-                           + args[3]);
+                + args[3]);
         return result;
     }
 
@@ -427,13 +488,13 @@ public class NMTFUtils {
             for (int i = 0; i < cat.length; i++) {
                 for (int k = 0; k < cat.length; k++) {
                     String trainPath = String.format("python ./clscl_train en %s cls-acl10-processed/en/%s/train.processed "
-                                                     + "cls-acl10-processed/en/%s/unlabeled.processed"
-                                                     + " cls-acl10-processed/%s/%s/unlabeled.processed "
-                                                     + "cls-acl10-processed/dict/en_%s_dict.txt "
-                                                     + "model.bz2 --phi 30 --max-unlabeled=50000 -k 100 -m 450 --strategy=parallel", language[j], cat[i], cat[i], language[j], cat[k], language[j]);
+                            + "cls-acl10-processed/en/%s/unlabeled.processed"
+                            + " cls-acl10-processed/%s/%s/unlabeled.processed "
+                            + "cls-acl10-processed/dict/en_%s_dict.txt "
+                            + "model.bz2 --phi 30 --max-unlabeled=50000 -k 100 -m 450 --strategy=parallel", language[j], cat[i], cat[i], language[j], cat[k], language[j]);
 
                     String testpath = String.format("python ./clscl_predict cls-acl10-processed/en/%s/train.processed"
-                                                    + " model.bz2 cls-acl10-processed/%s/%s/test.processed", cat[i], language[j], cat[k]);
+                            + " model.bz2 cls-acl10-processed/%s/%s/test.processed", cat[i], language[j], cat[k]);
                     ps.println(String.format("##%s\t%s\t%s", language[j], cat[i], cat[k]));
                     ps.println(trainPath);
                     ps.println(testpath);

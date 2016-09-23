@@ -1,6 +1,7 @@
-function Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta ,numK,similarK,numCircle)
+function Results = TTL(TrainX,TrainY,TestX,TestY,IntermididateX,IntermididateY,alpha,beta,gamma,delta ,numK,similarK,numCircle)
 similarK =  int32(similarK);
 G0 = [];
+Gi = [];
 for i = 1:length(TrainY)
     if TrainY(i) == 1
         G0(i,1) = 1;
@@ -11,6 +12,16 @@ for i = 1:length(TrainY)
     end
 end
 Gs = G0;
+
+for i = 1:length(IntermididateY)
+    if IntermididateY(i) == 1
+        Gi(i,1) = 1;
+        Gi(i,2) = 0;
+    else
+        Gi(i,1) = 0;
+        Gi(i,2) = 1;
+    end
+end
 
 %%%逻辑回归
 TrainXY = scale_cols(TrainX,TrainY);
@@ -30,9 +41,9 @@ for i = 1:length(lambda)
 end
 ptemp = 1./(1 + exp(-wbest'*TrainX));
 oriA = getResult(ptemp,TrainY);
+
 fprintf('Test accuracy on source domain is :%g\n',oriA);
 ptemp = 1./(1 + exp(-wbest'*TestX));
-
 oriA = getResult(ptemp,TestY);
 fprintf('Test accuracy on target domain is :%g\n',oriA);
 Gt = [];
@@ -40,14 +51,30 @@ for i = 1:length(TestY)
     Gt(i,1) = ptemp(i);
     Gt(i,2) = 1 - ptemp(i);
 end
+
+%%%%%%%%%%for imedate
+ptemp = 1./(1 + exp(-wbest'*IntermididateX));
+oriA = getResult(ptemp,IntermididateY);
+fprintf('Test accuracy on imddate domain is :%g\n',oriA);
+for i = 1:length(IntermididateY)
+    Gi(i,1) = ptemp(i);
+    Gi(i,2) = 1 - ptemp(i);
+end
+
 %%%%逻辑回归结束
 
 % 对Xs和Xt进行归一化
 Xs = TrainX;
+Xi = IntermididateX;
 Xt = TestX;
 for i = 1:size(TrainX,2)
     Xs(:,i) = Xs(:,i)/sum(Xs(:,i));
 end
+
+for i = 1:size(Xi,2)
+    Xi(:,i) = Xi(:,i)/sum(Xi(:,i));
+end
+
 for i = 1:size(TestX,2)
     Xt(:,i) = Xt(:,i)/sum(Xt(:,i));
 end
@@ -65,16 +92,21 @@ end
 % Winit = abs(randn(m,r));
 % Hinit = abs(randn(r,n));
 % [W,H] = nmf(full(all),Winit,Hinit,0.0000000000001,25,8000);
-% 
+%
 % for id=1:size(W,2)
 %     W(:,id) = W(:,id)/sum(W(:,id));
 % end
 %%%%end NMF way
 %%%Fss,Fsd
-Fss = W(:,1:similarK);
-Fsd = W(:,similarK+1:size(W,2));
-Fts = Fss;
-Ftd = Fsd;
+
+Fsic = W(:,1:similarK);
+Fsisd = W(:,similarK+1:size(W,2));
+Fsiid = Fsisd;
+
+Fitc = Fsic;
+Fitid = Fsisd;
+Fittd = Fitid;
+
 
 %%%Init SS
 SS = ones(size(W,2),size(Gs,2));
@@ -83,198 +115,298 @@ for i = 1:size(SS,1)
     SS(i,:) = SS(i,:)/sum(SS(i,:));
 end
 %%%Sss,Ssd
-Sss = SS(1:similarK,:);
-Ssd = SS(similarK+1:size(SS,1),:);
-Sts = Sss;
-Std = Ssd;
+Asic = SS(1:similarK,:);
+Asisd = SS(similarK+1:size(SS,1),:);
+Asiid = Asisd;
 
-tempFs = [Fss Fsd];
-tempSs = [Sss;Ssd];
-tempFt = [Fts Ftd];
-tempSt = [Sts;Std];
-v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
-v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
-v3 = alpha*trace(Fss'*Fss-2*Fss'*Fts+Fts'*Fts);
-v4 = beta*trace(Sss'*Sss-2*Sss'*Sts+Sts'*Sts);
-v5 = gamma *sum(sum(Fsd))+gamma *sum(sum(Ftd)) + delta * sum(sum(Ssd))+ delta * sum(sum(Std));
-fvalue = v1+v2+v3+v4+v5;
+Aitc = Asic;
+Aitid = Asisd;
+Aittd = Aitid;
+
+tempFs = [Fsic Fsisd];
+tempSs = [Asic;Asisd];
+tempFi = [Fsic Fsiid];
+tempSi = [Asic;Asiid];
+tempFit = [Fitc Fitid];
+tempSit = [Aitc;Aitid];
+tempFt = [Fitc Fittd];
+tempSt = [Aitc;Aittd];
+
+% df = Xs-tempFs*tempSs*Gs';
+% [df]
+% return;
+% xlswrite('fs.xls',tempFs);
+% xlswrite('ss.xls',tempSs);
+% xlswrite('gs.xls',Gs);
+
+sds =Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs';
+v1 = trace(sds);
+v2 = trace(Xi'*Xi-2*Xi'*tempFi*tempSi*Gi'+Gi*tempSi'*tempFi'*tempFi*tempSi*Gi');
+v3 = trace(Xi'*Xi-2*Xi'*tempFit*tempSit*Gi'+Gi*tempSit'*tempFit'*tempFit*tempSit*Gi');
+v4 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
+fprintf(' the value of objective v1 is %g\n',v1);
+fprintf(' the value of objective v2 is %g\n',v2);
+fprintf(' the value of objective v3 is %g\n',v3);
+fprintf(' the value of objective v4 is %g\n',v4);
+fvalue = v1+v2+v3+v4;
+fprintf(' the value of objective is %g\n',fvalue);
 tempf = 0;
 gradient = 1;
 % 开始进行迭代
 for circleID = 1:numCircle
     
-    %%%Fss
-    tempM = (Fss*Sss+Fsd*Ssd)*(Gs'*Gs)*Sss' + alpha*Fss;
-    tempM1 = (Xs*Gs)*Sss' + alpha*Fts;
-    for i = 1:size(Fss,1)
-        for j = 1:size(Fss,2)
+    %%%Fsic
+    tempM = (Fsic*Asic+Fsisd*Asisd)*Gs'*Gs*Asic' +  (Fsic*Asic+Fsiid*Asiid)*Gi'*Gi*Asic';
+    tempM1 = Xs*Gs*Asic' + Xi*Gi*Asic';
+    for i = 1:size(Fsic,1)
+        for j = 1:size(Fsic,2)
             if tempM(i,j)~=0
-                Fss(i,j) = Fss(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Fsic(i,j) = Fsic(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
             else
-                Fss(i,j) = 0;
+                Fsic(i,j) = 0;
             end
         end
     end
-    for i = 1:size(Fss,2)
-        if sum(Fss(:,i))~= 0
-            Fss(:,i) = Fss(:,i)/sum(Fss(:,i));
-        else
-            for j = 1:size(Fss,2)
-                Fss(i,j) = 1/(size(Fss,2));
-            end
-        end
-    end
-    %%Sss
-    tempM = Fss'*(Fss*Sss+ Fsd*Ssd)*(Gs'*Gs) + beta *Sss;
-    tempM1 = Fss'*(Xs*Gs) + beta*Sts;
-    for i = 1:size(Sss,1)
-        for j = 1:size(Sss,2)
+    
+    %% Asic
+    tempM = Fsic'*(Fsic*Asic+Fsisd*Asisd)*Gs'*Gs +  Fsic'*(Fsic*Asic+Fsiid*Asiid)*Gi'*Gi;
+    tempM1 = Fsic'*Xs*Gs  + Fsic'*Xi*Gi;
+    for i = 1:size(Asic,1)
+        for j = 1:size(Asic,2)
             if tempM(i,j)~=0
-                Sss(i,j) = Sss(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Asic(i,j) = Asic(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
             else
-                 fprintf('the Sss is %g\n',tempM(i,j));
-                Sss(i,j) = 0;
+                Asic(i,j) = 0;
             end
         end
     end
     
-    %%Fsd
-    tempM = 2*(Fss*Sss+Fsd*Ssd)*(Gs'*Gs)*Ssd';
-    tempM1 = 2*(Xs)*Gs*Ssd';
-    for i = 1:size(Fsd,1)
-        for j = 1:size(Fsd,2)
-%             if Fsd(i,j) > Ftd(i,j)
-%                 gradient = 1;
-%             else
-%                 gradient = -1;
-%             end
-            tempMu = tempM(i,j) +gamma*gradient;
-            if tempMu > 0
-                Fsd(i,j) = Fsd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+    %%Fsisd
+    tempM = (Fsic*Asic+Fsisd*Asisd)*Gs'*Gs*Asisd';
+    tempM1 = Xs*Gs*Asisd';
+    for i = 1:size(Fsisd,1)
+        for j = 1:size(Fsisd,2)
+            if tempM(i,j) > 0
+                Fsisd(i,j) = Fsisd(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
             else
-                fprintf('the Fsd is %g\n',tempMu(i,j));
-                Fsd(i,j) = 0;
-            end
-        end
-    end
-    for i = 1:size(Fsd,2)
-        if sum(Fsd(:,i))~= 0
-            Fsd(:,i) = Fsd(:,i)/sum(Fsd(:,i));
-        else
-            for j = 1:size(Fsd,2)
-                Fsd(i,j) = 1/(size(Fsd,2));
+                Fsisd(i,j) = 0;
             end
         end
     end
     
-    %%Ssd
-    tempM = 2*(Fsd'*(Fss*Sss+Fsd*Ssd)*Gs'*Gs);
-    tempM1 = 2*Fsd'*(Xs)*Gs;
-    for i = 1:size(Ssd,1)
-        for j = 1:size(Ssd,2)
-%             if Ssd(i,j) >= Std(i,j)
-%                 gradient = 1;
-%             else
-%                 gradient = -1;
-%             end
-            tempMu = tempM(i,j) + delta*gradient;
-            if tempMu > 0
-                Ssd(i,j) = Ssd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+    
+    %%Asisd
+    tempM = Fsisd'*(Fsic*Asic+Fsisd*Asisd)*Gs'*Gs;
+    tempM1 = Fsisd'*Xs*Gs;
+    for i = 1:size(Asisd,1)
+        for j = 1:size(Asisd,2)
+            if tempM(i,j) > 0
+                Asisd(i,j) = Asisd(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
             else
-                fprintf('the Ssd is %g\n',tempMu);
-                Ssd(i,j) = 0;
+                Asisd(i,j) = 0;
             end
         end
     end
     
-    %%  Fts
-    tempM = (Fts*Sts+Ftd*Std)*Gt'*Gt*Sts' + alpha*Fts;
-    tempM1 = Xt*Gt*Sts'+alpha*Fss;
-    for i = 1:size(Fts,1)
-        for j = 1:size(Fts,2)
+    
+    %%Fsiid
+    tempM = (Fsic*Asic+Fsiid*Asiid)*Gi'*Gi*Asiid';
+    tempM1 = Xi*Gi*Asiid';
+    for i = 1:size(Fsiid,1)
+        for j = 1:size(Fsiid,2)
+            if tempM(i,j) > 0
+                Fsiid(i,j) = Fsiid(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+            else
+                Fsiid(i,j) = 0;
+            end
+        end
+    end
+    
+    %%Asiid
+    tempM = Fsiid'*(Fsic*Asic+Fsiid*Asiid)*Gi'*Gi;
+    tempM1 = Fsiid'*Xi*Gi;
+    for i = 1:size(Asiid,1)
+        for j = 1:size(Asiid,2)
+            if tempM(i,j) > 0
+                Asiid(i,j) = Asiid(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+            else
+                Asiid(i,j) = 0;
+            end
+        end
+    end
+    %%%%%%%%%%%%%%%%%%%%%%% fi end
+    
+    
+    
+    %%%Fitc
+    tempM = (Fitc*Aitc+Fitid*Aitid)*Gi'*Gi*Aitc' +  (Fitc*Aitc+Fittd*Aittd)*Gt'*Gt*Aitc';
+    tempM1 = Xt*Gt*Aitc' + Xi*Gi*Aitc';
+    for i = 1:size(Fitc,1)
+        for j = 1:size(Fitc,2)
             if tempM(i,j)~=0
-                Fts(i,j) = Fts(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Fitc(i,j) = Fitc(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
             else
-                fprintf('the Fts is %g\n',tempM(i,j));
-                Fts(i,j) =0;
-            end
-        end
-    end
-    for i = 1:size(Fts,2)
-        if sum(Fts(:,i))~= 0
-            Fts(:,i) = Fts(:,i)/sum(Fts(:,i));
-        else
-            for j = 1:size(Fts,2)
-                Fts(i,j) = 1/(size(Fts,2));
+                Fitc(i,j) = 0;
             end
         end
     end
     
-    %%Sts
-    tempM = Fts'*(Fts*Sts+Ftd*Std)*Gt'*Gt + beta * Sts;
-    tempM1 = Fts'*Xt*Gt + beta*Sss;
-    for i = 1:size(Sts,1)
-        for j = 1:size(Sts,2)
+    %% Aitc
+    tempM = Fitc'*(Fitc*Aitc+Fitid*Aitid)*Gi'*Gi +  Fitc'*(Fitc*Aitc+Fittd*Aittd)*Gt'*Gt;
+    tempM1 = Fitc'*Xi*Gi  + Fitc'*Xt*Gt;
+    for i = 1:size(Aitc,1)
+        for j = 1:size(Aitc,2)
             if tempM(i,j)~=0
-                Sts(i,j) = Sts(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+                Aitc(i,j) = Aitc(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
             else
-                fprintf('the Sts is %g\n',tempM(i,j));
-                Sts(i,j) = 0;
+                Aitc(i,j) = 0;
             end
         end
     end
     
-    %%  Ftd
-    tempM = 2*(Fts*Sts+Ftd*Std)*Gt'*Gt*Std';
-    tempM1 = 2*(Xt)*Gt*Std';
-    for i = 1:size(Ftd,1)
-        for j = 1:size(Ftd,2)
-%             if Ftd(i,j) > Fsd(i,j)
-%                 gradient = 1;
-%             else
-%                 gradient = -1;
-%             end
-            tempMu = tempM(i,j) + gamma*gradient;
-            if tempMu > 0
-                Ftd(i,j) = Ftd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+    %%Fitid
+    tempM = (Fitc*Aitc+Fitid*Aitid)*Gi'*Gi*Aitid';
+    tempM1 = Xi*Gi*Aitid';
+    for i = 1:size(Fitid,1)
+        for j = 1:size(Fitid,2)
+            if tempM(i,j) > 0
+                Fitid(i,j) = Fitid(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
             else
-                fprintf('the Ftd is %g\n',tempMu);
-                Ftd(i,j) =0;
+                Fitid(i,j) = 0;
             end
         end
     end
-    for i = 1:size(Ftd,2)
-        if sum(Ftd(:,i))~= 0
-            Ftd(:,i) = Ftd(:,i)/sum(Ftd(:,i));
+    
+    
+    %%Aitid
+    tempM = Fitid'*(Fitc*Aitc+Fitid*Aitid)*Gi'*Gi;
+    tempM1 = Fitid'*Xi*Gi;
+    for i = 1:size(Aitid,1)
+        for j = 1:size(Aitid,2)
+            if tempM(i,j) > 0
+                Aitid(i,j) = Aitid(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+            else
+                Aitid(i,j) = 0;
+            end
+        end
+    end
+    
+    %%Fittd
+    tempM = (Fitc*Aitc+Fittd*Aittd)*Gt'*Gt*Aittd';
+    tempM1 = Xt*Gt*Aittd';
+    for i = 1:size(Fittd,1)
+        for j = 1:size(Fittd,2)
+            if tempM(i,j) > 0
+                Fittd(i,j) = Fittd(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+            else
+                Fittd(i,j) = 0;
+            end
+        end
+    end
+    
+    
+    %%Aittd
+    tempM = Fittd'*(Fitc*Aitc+Fittd*Aittd)*Gt'*Gt;
+    tempM1 = Fittd'*Xt*Gt;
+    for i = 1:size(Aittd,1)
+        for j = 1:size(Aittd,2)
+            if tempM(i,j) > 0
+                Aittd(i,j) = Aittd(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
+            else
+                Aittd(i,j) = 0;
+            end
+        end
+    end
+    
+    %%norm Fsic
+    for i = 1:size(Fsic,2)
+        if sum(Fsic(:,i))~= 0
+            Fsic(:,i) = Fsic(:,i)/sum(Fsic(:,i));
         else
-            for j = 1:size(Ftd,2)
-                Ftd(i,j) = 1/(size(Ftd,2));
+            for j = 1:size(Fsic,2)
+                Fsic(i,j) = 1/(size(Fsic,2));
             end
         end
     end
     
-    %%Std
-    tempM = 2*Ftd'*(Fts*Sts+Ftd*Std)*Gt'*Gt;
-    tempM1 = 2*Ftd'*(Xt)*Gt;
-    for i = 1:size(Std,1)
-        for j = 1:size(Std,2)
-%             if Std(i,j) >= Ssd(i,j)
-%                 gradient = 1;
-%             else
-%                 gradient = -1;
-%             end
-            tempMu = tempM(i,j) + delta*gradient;
-            if tempMu > 0
-                Std(i,j) = Std(i,j)*(tempM1(i,j)/tempMu)^(0.5);
+    %%norm Fsisd
+    for i = 1:size(Fsisd,2)
+        if sum(Fsisd(:,i))~= 0
+            Fsisd(:,i) = Fsisd(:,i)/sum(Fsisd(:,i));
+        else
+            for j = 1:size(Fsisd,2)
+                Fsisd(i,j) = 1/(size(Fsisd,2));
+            end
+        end
+    end
+    
+    %% norm Fsiid
+    for i = 1:size(Fsiid,2)
+        if sum(Fsiid(:,i))~= 0
+            Fsiid(:,i) = Fsiid(:,i)/sum(Fsiid(:,i));
+        else
+            for j = 1:size(Fsiid,2)
+                Fsiid(i,j) = 1/(size(Fsiid,2));
+            end
+        end
+    end
+    %% norm Fitc
+    for i = 1:size(Fitc,2)
+        if sum(Fitc(:,i))~= 0
+            Fitc(:,i) = Fitc(:,i)/sum(Fitc(:,i));
+        else
+            for j = 1:size(Fitc,2)
+                Fitc(i,j) = 1/(size(Fitc,2));
+            end
+        end
+    end
+    %%norm Fitid
+    for i = 1:size(Fitid,2)
+        if sum(Fitid(:,i))~= 0
+            Fitid(:,i) = Fitid(:,i)/sum(Fitid(:,i));
+        else
+            for j = 1:size(Fitid,2)
+                Fitid(i,j) = 1/(size(Fitid,2));
+            end
+        end
+    end
+    %%norm Fittd
+    for i = 1:size(Fittd,2)
+        if sum(Fittd(:,i))~= 0
+            Fittd(:,i) = Fittd(:,i)/sum(Fittd(:,i));
+        else
+            for j = 1:size(Fittd,2)
+                Fittd(i,j) = 1/(size(Fittd,2));
+            end
+        end
+    end
+    
+    %% Gi
+    temp1 = Fsic*Asic+Fsiid*Asiid;
+    temp2 = Fitc*Aitc+Fitid*Aitid;
+    tempM = Gi*temp1'*temp1 + Gi*temp2'*temp2;
+    tempM1 = Xi'*temp1+Xi'*temp2;
+    for i = 1:size(Gi,1)
+        for j = 1:size(Gi,2)
+            if tempM(i,j)~=0
+                Gi(i,j) = Gi(i,j)*(tempM1(i,j)/tempM(i,j))^(0.5);
             else
-                fprintf('the Std is %g\n',tempMu);
-                Std(i,j) = 0;
+                Gi(i,j) = 0;
+            end
+        end
+    end
+    for i = 1:size(Gi,1)
+        if sum(Gi(i,:))~= 0
+            Gi(i,:) = Gi(i,:)/sum(Gi(i,:));
+        else
+            for j = 1:size(Gi,2)
+                Gi(i,j) = 1/(size(Gi,2));
             end
         end
     end
     
     %% Gt
-    tempFS = Fts*Sts+Ftd*Std;
+    tempFS = Fitc*Aitc+Fittd*Aittd;
     tempM = (Gt*tempFS'*tempFS);
     tempM1 = Xt'*tempFS;
     for i = 1:size(Gt,1)
@@ -296,17 +428,20 @@ for circleID = 1:numCircle
         end
     end
     
-    tempFs = [Fss Fsd];
-    tempSs = [Sss;Ssd];
-    tempFt = [Fts Ftd];
-    tempSt = [Sts;Std];
+    
+    tempFs = [Fsic Fsisd];
+    tempSs = [Asic;Asisd];
+    tempFi = [Fsic Fsiid];
+    tempSi = [Asic;Asiid];
+    tempFit = [Fitc Fitid];
+    tempSit = [Aitc;Aitid];
+    tempFt = [Fitc Fittd];
+    tempSt = [Aitc;Aittd];
     v1 = trace(Xs'*Xs-2*Xs'*tempFs*tempSs*Gs'+Gs*tempSs'*tempFs'*tempFs*tempSs*Gs');
-    v2 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
-    v3 = alpha*trace(Fss'*Fss-2*Fss'*Fts+Fts'*Fts);
-    v4 = beta*trace(Sss'*Sss-2*Sss'*Sts+Sts'*Sts);
-    v5 = gamma *sum(sum(Fsd))+gamma *sum(sum(Ftd)) + delta * sum(sum(Ssd))+ delta * sum(sum(Std));
-    fvalue = v1+v2+v3+v4 + v5;
-    tempf = 0;
+    v2 = trace(Xi'*Xi-2*Xi'*tempFi*tempSi*Gi'+Gi*tempSi'*tempFi'*tempFi*tempSi*Gi');
+    v3 = trace(Xi'*Xi-2*Xi'*tempFit*tempSit*Gi'+Gi*tempSit'*tempFit'*tempFit*tempSit*Gi');
+    v4 = trace(Xt'*Xt-2*Xt'*tempFt*tempSt*Gt'+Gt*tempSt'*tempFt'*tempFt*tempSt*Gt');
+    fvalue = v1+v2+v3+v4;
     if circleID == 1
         tempf = fvalue;
     end

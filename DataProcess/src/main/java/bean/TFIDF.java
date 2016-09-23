@@ -30,12 +30,12 @@ public class TFIDF {
                 docs.put(docID, doc);
 
                 Integer wordSize = Integer.parseInt(line.substring(0,
-                                                                   line.indexOf(' ')));
+                        line.indexOf(' ')));
                 line = line.substring(line.indexOf(' ') + 1);
                 doc.setRealSize(wordSize);
 
                 Double polar = Double.parseDouble(line.substring(0,
-                                                                 line.indexOf(' ')));
+                        line.indexOf(' ')));
                 line = line.substring(line.indexOf(' ') + 1);
                 doc.setPolarity(polar);
 
@@ -243,8 +243,8 @@ public class TFIDF {
      * 计算tfidf
      *
      * @param docs 带计算文档 提供tf
-     * @param df 关键字df
-     * @param dic 字典，提供id
+     * @param df   关键字df
+     * @param dic  字典，提供id
      * @return
      */
     private static Map<String, tfidfDocument> CalTfidf(
@@ -471,10 +471,10 @@ public class TFIDF {
         @Override
         public String toString() {
             return "U1{"
-                   + "ID='" + ID + '\''
-                   + ", value=" + value
-                   + ", polar=" + polar
-                   + '}';
+                    + "ID='" + ID + '\''
+                    + ", value=" + value
+                    + ", polar=" + polar
+                    + '}';
         }
     }
 }
