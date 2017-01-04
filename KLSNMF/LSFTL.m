@@ -101,6 +101,10 @@ v3 = alpha*trace(Fs1'*Fs1-2*Fs1'*Ft1+Ft1'*Ft1);
 v4 = alpha*trace(Ss1'*Ss1-2*Ss1'*St1+St1'*St1);
 fvalue = v1+v2+v3+v4;
 tempf = 0;
+bestRes  =0.;
+bestFt = [];
+bestSt=[];
+bestGt = [];
 for circleID = 1:numCircle
     
     %%%Fs1,Fs,Ss1,Ss
@@ -303,14 +307,23 @@ for circleID = 1:numCircle
             pp(1,i) = 0.5;
         end
     end
-    Results(circleID) = getResult(pp,TestY)*100;
+    temprecious = getResult(pp,TestY)*100;
+    Results(circleID) = temprecious;
     lvalues(circleID) = fvalue;
-    
+    if temprecious > bestRes
+        bestRes = temprecious;
+        bestFt = tempFt;
+        bestSt = tempSt;
+        bestGt = Gt;
+    end
     fprintf('the %g iteration is %g, the max is %g. the value of objective is %g\n',circleID,getResult(pp,TestY),max(Results),fvalue);
 end
+
 tempRes = [Results;lvalues]
 Results = tempRes;
-
+xlswrite(strcat('F.xls'),bestFt);
+xlswrite(strcat('S.xls'),bestSt);
+xlswrite(strcat('G.xls'),bestGt);
 % [res] = xlsread(strcat('iteration_F.xls'));
 % xlswrite(strcat('iteration_F.xls'),[res;Results;lvalues]);
 % x = 0:1:numCircle-1;
