@@ -16,11 +16,11 @@ public class NMTFUtils {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Start!");
-
+//        build();
 //        TF2TFIDF();
         //一定要把原领域的test加入到训练集中,论文中的实验是4000天训练数据
         //join();
-//        batch();
+        batch();
     }
 
     /**
@@ -79,8 +79,8 @@ public class NMTFUtils {
         Map<String, tfidfDocument> cnTest = TFIDF.readFille(testpath);
         // 初始化标注语料
         Map<String, tfidfDocument> trainDoc = TFIDF.readFille(trainPath);
-
-        PrintStream ps = new PrintStream("c:/dict.dat");
+            
+        PrintStream ps = new PrintStream(dir + "dict.dat");
         Set<Map.Entry<String, Integer>> entries = Dic.entrySet();
         List<DIC> dicLists = new ArrayList<>();
 
@@ -253,21 +253,21 @@ public class NMTFUtils {
      * @throws Exception
      */
     public static void build() throws Exception {
-        String trainPath = "C:\\Workspaces\\CoTraining\\datafiles\\co-training\\book\\cn_l_doc.dat";
-        String testPath = "C:\\cls-acl10-processed\\de\\music\\trans\\en\\music\\test.processed.dat";
+        String trainPath = "e:\\cls-acl10-processed_cutshortdoc\\en\\books\\train.processed.dat";
+        String testPath = "e:\\cls-acl10-processed_cutshortdoc\\de\\music\\trans\\en\\music\\test.processed.dat";
         // 初始化字典
         Map<String, Integer> cnDic = TFIDF.initDic(new String[]{
             trainPath, testPath});
         System.out.println("词典长度 : " + cnDic.size());
-        PrintStream ps = new PrintStream("c:/dict.dat");
+        PrintStream ps = new PrintStream("c:/NMTF/dict.dat");
         Set<Map.Entry<String, Integer>> entries = cnDic.entrySet();
         for (Map.Entry<String, Integer> entr : entries) {
             ps.println(entr.getKey() + "@:@" + entr.getValue());
         }
         ps.close();
-        String bestTrain = "c:/NMTFUtils/Train.data";
-        String bestlabel = "c:/NMTFUtils/Train.label";
-        String test = "c:/NMTFUtils/Test.data";
+        String bestTrain = "c:/NMTF/Train.data";
+        String bestlabel = "c:/NMTF/Train.label";
+        String test = "c:/NMTF/Test.data";
         String testlabel = "c:/NMTF/Test.label";
         // 初始化训练语料
         Map<String, tfidfDocument> cnTest = TFIDF.readFille(testPath);
@@ -284,14 +284,14 @@ public class NMTFUtils {
      */
     public static void batch() throws Exception {
         boolean addflag = true;
-        String basedir = addflag ? "f:/cls-acl10-processed_cutshortdoc/mydata_add_withtraintest/" : "c:/mydata_cut/";
+        String basedir = addflag ? "e:/cls-acl10-processed_cutshortdoc/mydata_add_withtraintest/" : "c:/mydata_cut/";
         String language[] = {"de", "fr", "jp"};
         String cat[] = {"books", "dvd", "music"};
         for (int i = 0; i < cat.length; i++) {
-            String trainPath = String.format("f:/cls-acl10-processed_cutshortdoc\\en\\%s\\train.processed.dat", cat[i]);
+            String trainPath = String.format("e:/cls-acl10-processed_cutshortdoc\\en\\%s\\train.processed.dat", cat[i]);
             for (int j = 0; j < language.length; j++) {
                 for (int k = 0; k < cat.length; k++) {
-                    String testpath = String.format("f:/cls-acl10-processed_cutshortdoc\\%s\\%s\\trans\\en\\%s\\test.processed.dat", language[j], cat[k], cat[k]);
+                    String testpath = String.format("e:/cls-acl10-processed_cutshortdoc\\%s\\%s\\trans\\en\\%s\\test.processed.dat", language[j], cat[k], cat[k]);
                     String dir = String.format("%s/en_%s_%s_%s/", basedir, language[j], cat[i], cat[k]);
                     File file = new File(dir);
                     if (!file.exists()) {

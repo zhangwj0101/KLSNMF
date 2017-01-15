@@ -1,15 +1,16 @@
 clear all;
 
-TrainX = load('C:\NMTF/Train.data');
+TrainX = load('E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_fr_books_dvd/Train.data');
 TrainX = spconvert(TrainX);
-TrainY = load('C:\NMTF/Train.label');
+TrainY = load('E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_fr_books_dvd/Train.label');
 TrainY = TrainY';
-TestX = load('C:\NMTF/Test.data');
+TestX = load('E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_fr_books_dvd/Test.data');
 TestX = spconvert(TestX);
 %%
-TestY = load('C:\NMTF/Test.label');
+TestY = load('E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_fr_books_dvd/Test.label');
 TestY = TestY';
-
+[size(TrainX)]
+[size(TestX)]
 for id = 1:length(TrainY)
     if TrainY(id) == 2
         TrainY(id) = -1;
