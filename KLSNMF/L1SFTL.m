@@ -85,6 +85,7 @@ v4 = beta*trace(Sss'*Sss-2*Sss'*Sts+Sts'*Sts);
 v5 = gamma *sum(sum(abs(Fsd-Ftd))) + delta * sum(sum(abs(Ssd-Std)));
 fvalue = v1+v2+v3+v4+v5;
 tempf = 0;
+bestRes =0.;
 % 开始进行迭代
 for circleID = 1:numCircle
     
@@ -303,10 +304,22 @@ for circleID = 1:numCircle
             pp(1,i) = 0.5;
         end
     end
-    Results(circleID) = getResult(pp,TestY)*100;
+    %Results(circleID) = getResult(pp,TestY)*100;
+    %lvalues(circleID) = fvalue;
+	temprecious = getResult(pp,TestY)*100;
+    Results(circleID) = temprecious;
     lvalues(circleID) = fvalue;
+    if temprecious > bestRes
+        bestRes = temprecious;
+        bestFt = [Fts Ftd];
+        bestSt =[Sts;Std];
+        bestGt = Gt;
+    end
     
     fprintf('the %g iteration is %g, the max is %g. the value of objective is %g\n',circleID,getResult(pp,TestY),max(Results),fvalue);
 end
 tempRes = [Results;lvalues]
 Results = tempRes;
+xlswrite(strcat('F.xls'),bestFt);
+xlswrite(strcat('S.xls'),bestSt);
+xlswrite(strcat('G.xls'),bestGt);
