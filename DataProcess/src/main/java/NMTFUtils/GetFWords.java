@@ -21,10 +21,10 @@ import org.apache.commons.io.FileUtils;
  */
 public class GetFWords {
 
-    static String dicpath = "E:\\cls-acl10-processed_cutshortdoc\\mydata_add_withtraintest\\en_fr_books_dvd\\dict.dat";
+    static String dicpath = "E:\\cls-acl10-processed_cutshortdoc\\mydata_add_withtraintest\\en_de_books_books\\dict.dat";
 
     public static void main(String[] args) throws IOException {
-        String base = "EBFD";
+        String base = "EBGB";
         getTopWordsLSFTL(base);
 //        getTopWordsTriTL(base);
     }
@@ -34,7 +34,7 @@ public class GetFWords {
         List<String> dictsLists = FileUtils
                 .readLines(new File(dicpath));
         List<String> indexLists = FileUtils
-                .readLines(new File("G:\\syn_github\\KLSNMF\\KLSNMF\\index.csv"));
+                .readLines(new File("G:\\syn_github\\KLSNMF\\KLSNMF\\indext.csv"));
         Map<String, String> wordMaps = new HashMap<>();
 
         for (String line : dictsLists) {
@@ -45,7 +45,7 @@ public class GetFWords {
                 wordMaps.put(split[0], split[1]);
             }
         }
-        PrintStream ps = new PrintStream("G:\\毕业设计论文\\写论文\\journal\\" + base + "\\LSFTL-TopWords.txt");
+        PrintStream ps = new PrintStream("G:\\毕业设计论文\\写论文\\journal\\" + base + "\\LSFTLt-TopWords.txt");
         for (int li = 0; li < indexLists.size(); li++) {
             String[] split = indexLists.get(li).split(",");
             StringBuilder topWords = new StringBuilder();
