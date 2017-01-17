@@ -312,6 +312,8 @@ for circleID = 1:numCircle
     lvalues(circleID) = fvalue;
     if temprecious > bestRes
         bestRes = temprecious;
+        bestFs = tempFs;
+        bestSs = tempSs;
         bestFt = tempFt;
         bestSt = tempSt;
         bestGt = Gt;
@@ -321,8 +323,10 @@ end
 
 tempRes = [Results;lvalues]
 Results = tempRes;
-xlswrite(strcat('F.xls'),bestFt);
-xlswrite(strcat('S.xls'),bestSt);
+xlswrite(strcat('Fs.xls'),bestFs);
+xlswrite(strcat('Ss.xls'),bestSs);
+xlswrite(strcat('Ft.xls'),bestFt);
+xlswrite(strcat('St.xls'),bestSt);
 xlswrite(strcat('G.xls'),bestGt);
 % [res] = xlsread(strcat('iteration_F.xls'));
 % xlswrite(strcat('iteration_F.xls'),[res;Results;lvalues]);
