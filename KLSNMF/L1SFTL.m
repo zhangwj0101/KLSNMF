@@ -313,6 +313,8 @@ for circleID = 1:numCircle
         bestRes = temprecious;
         bestFt = [Fts Ftd];
         bestSt =[Sts;Std];
+        bestFs = [Fss Fsd];
+        bestSs =[Sss;Ssd];
         bestGt = Gt;
     end
     
@@ -320,6 +322,8 @@ for circleID = 1:numCircle
 end
 tempRes = [Results;lvalues]
 Results = tempRes;
-xlswrite(strcat('F.xls'),bestFt);
-xlswrite(strcat('S.xls'),bestSt);
-xlswrite(strcat('G.xls'),bestGt);
+xlswrite(strcat('Fs.xls'),bestFs);
+xlswrite(strcat('Ss.xls'),bestSs);
+xlswrite(strcat('Ft.xls'),bestFt);
+xlswrite(strcat('St.xls'),bestSt);
+xlswrite(strcat('Gt.xls'),bestGt);
