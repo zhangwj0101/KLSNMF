@@ -1,4 +1,7 @@
 clear all;
-bestFt = xlsread(strcat('F.xls'));
+bestFs = xlsread(strcat('Fs.xls'));
+[sA index] = sort(bestFs,'descend');
+csvwrite('indexs.csv',index');
+bestFt = xlsread(strcat('Ft.xls'));
 [sA index] = sort(bestFt,'descend');
-csvwrite('index.csv',index');
+csvwrite('indext.csv',index');
