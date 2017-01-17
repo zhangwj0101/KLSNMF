@@ -34,7 +34,7 @@ public class GetFWords {
         List<String> dictsLists = FileUtils
                 .readLines(new File(dicpath));
         List<String> indexLists = FileUtils
-                .readLines(new File("G:\\syn_github\\KLSNMF\\KLSNMF\\index.csv"));
+                .readLines(new File("G:\\syn_github\\KLSNMF\\KLSNMF\\indexs.csv"));
         Map<String, String> wordMaps = new HashMap<>();
 
         for (String line : dictsLists) {
@@ -45,7 +45,7 @@ public class GetFWords {
                 wordMaps.put(split[0], split[1]);
             }
         }
-        PrintStream ps = new PrintStream("G:\\毕业设计论文\\写论文\\journal\\" + base + "\\L1SFTL-TopWords.txt");
+        PrintStream ps = new PrintStream("G:\\毕业设计论文\\写论文\\journal\\" + base + "\\L1SFTLs-TopWords.txt");
         for (int li = 0; li < indexLists.size(); li++) {
             String[] split = indexLists.get(li).split(",");
             StringBuilder topWords = new StringBuilder();
