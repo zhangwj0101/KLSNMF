@@ -20,7 +20,7 @@ public class NMTFUtils {
 //        TF2TFIDF();
         //一定要把原领域的test加入到训练集中,论文中的实验是4000天训练数据
         //join();
-        batch();
+        batchforch();
     }
 
     /**
@@ -277,6 +277,33 @@ public class NMTFUtils {
         TFIDF.saveDocsAsTFIDFFOR_NMTF(test, testlabel, cnTest, cnDic);
     }
 
+     /**
+     * 批量转换数据到matlab输入格式
+     *
+     * @throws Exception
+     */
+    public static void batchforch() throws Exception {
+        boolean addflag = true;
+        String basedir = "e:/cls-acl10-processed_cutshortdoc/mydata_add_withtraintest/" ;
+        String language[] = {"cn"};
+        String cat[] = {"books", "dvd", "music"};
+        for (int i = 0; i < cat.length; i++) {
+            String trainPath = String.format("e:/cls-acl10-processed_cutshortdoc\\en\\%s\\train.processed.dat", cat[i]);
+            for (int j = 0; j < language.length; j++) {
+                for (int k = 0; k < cat.length; k++) {
+                    String testpath = String.format("e:/cls-acl10-processed_cutshortdoc\\%s\\%s\\trans\\en\\%s\\test.processed.dat", language[j], cat[k], cat[k]);
+                    String dir = String.format("%s/en_%s_%s_%s/", basedir, language[j], cat[i], cat[k]);
+                    File file = new File(dir);
+                    if (!file.exists()) {
+                        file.mkdirs();
+                    }
+                    saveToMatlabFormat(trainPath, testpath, null, dir, addflag);
+//                    runSVM(trainPath, testpath, null);
+                }
+            }
+        }
+    }
+    
     /**
      * 批量转换数据到matlab输入格式
      *
