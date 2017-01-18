@@ -16,11 +16,12 @@ public class NMTFUtils {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Start!");
+
 //        build();
 //        TF2TFIDF();
         //一定要把原领域的test加入到训练集中,论文中的实验是4000天训练数据
         //join();
-        batchforch();
+        batchfor20newsgroup();
     }
 
     /**
@@ -79,7 +80,7 @@ public class NMTFUtils {
         Map<String, tfidfDocument> cnTest = TFIDF.readFille(testpath);
         // 初始化标注语料
         Map<String, tfidfDocument> trainDoc = TFIDF.readFille(trainPath);
-            
+
         PrintStream ps = new PrintStream(dir + "dict.dat");
         Set<Map.Entry<String, Integer>> entries = Dic.entrySet();
         List<DIC> dicLists = new ArrayList<>();
@@ -277,14 +278,36 @@ public class NMTFUtils {
         TFIDF.saveDocsAsTFIDFFOR_NMTF(test, testlabel, cnTest, cnDic);
     }
 
-     /**
+    /**
+     * 批量转换数据到matlab输入格式
+     *
+     * @throws Exception
+     */
+    public static void batchfor20newsgroup() throws Exception {
+        boolean addflag = true;
+        String basedir = "G:\\毕业设计论文\\20NG_final";
+        String cat[] = {"comp_rec", "comp_sci", "comp_talk", "rec_sci", "rec_talk", "sci_talk"};
+        for (int i = 0; i < cat.length; i++) {
+            String trainPath = String.format("G:\\毕业设计论文\\20NG_final/%s/train.dat", cat[i]);
+            String testpath = String.format("G:\\毕业设计论文\\20NG_final/%s/test.dat", cat[i]);
+            String dir = String.format("%s/matlabformat/%s/", basedir, cat[i]);
+            File file = new File(dir);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+            saveToMatlabFormat(trainPath, testpath, null, dir, addflag);
+//                    runSVM(trainPath, testpath, null);
+        }
+    }
+
+    /**
      * 批量转换数据到matlab输入格式
      *
      * @throws Exception
      */
     public static void batchforch() throws Exception {
         boolean addflag = true;
-        String basedir = "e:/cls-acl10-processed_cutshortdoc/mydata_add_withtraintest/" ;
+        String basedir = "e:/cls-acl10-processed_cutshortdoc/mydata_add_withtraintest/";
         String language[] = {"cn"};
         String cat[] = {"books", "dvd", "music"};
         for (int i = 0; i < cat.length; i++) {
@@ -303,7 +326,7 @@ public class NMTFUtils {
             }
         }
     }
-    
+
     /**
      * 批量转换数据到matlab输入格式
      *
@@ -464,6 +487,7 @@ public class NMTFUtils {
                     ps.println(String.format("##%s\t%s\t%s", language[j], cat[i], cat[k]));
                     ps.println(trainPath);
                     ps.println(testpath);
+
                 }
             }
         }
