@@ -10,7 +10,7 @@ for i = 1:length(TrainY)
         G0(i,2) = 1;
     end
 end
-K1 = 40;
+K1 = 20;
 %%%Âß¼­»Ø¹é
 TrainXY = scale_cols(TrainX,TrainY);
 fprintf('......start to train logistic regression model.........\n');
