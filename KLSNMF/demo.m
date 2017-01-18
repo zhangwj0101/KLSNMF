@@ -1,13 +1,13 @@
 clear all;
 
-TrainX = load('E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_de_books_books/Train.data');
+TrainX = load('G:\毕业设计论文\20NG_final\matlabformat\comp_rec/Train.data');
 TrainX = spconvert(TrainX);
-TrainY = load('E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_de_books_books/Train.label');
+TrainY = load('G:\毕业设计论文\20NG_final\matlabformat\comp_rec/Train.label');
 TrainY = TrainY';
-TestX = load('E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_de_books_books/Test.data');
+TestX = load('G:\毕业设计论文\20NG_final\matlabformat\comp_rec/Test.data');
 TestX = spconvert(TestX);
 %%
-TestY = load('E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_de_books_books/Test.label');
+TestY = load('G:\毕业设计论文\20NG_final\matlabformat\comp_rec/Test.label');
 TestY = TestY';
 [size(TrainX)]
 [size(TestX)]
