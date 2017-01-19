@@ -1,4 +1,4 @@
-function Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta ,numK,similarK,numCircle)
+function Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta ,numK,similarK,numCircle,base)
 similarK =  int32(similarK);
 G0 = [];
 for i = 1:length(TrainY)
@@ -322,8 +322,8 @@ for circleID = 1:numCircle
 end
 tempRes = [Results;lvalues]
 Results = tempRes;
-xlswrite(strcat('Fs.xls'),bestFs);
-xlswrite(strcat('Ss.xls'),bestSs);
-xlswrite(strcat('Ft.xls'),bestFt);
-xlswrite(strcat('St.xls'),bestSt);
-xlswrite(strcat('Gt.xls'),bestGt);
+csvwrite(strcat(base,'/L1_Fs.csv'),bestFs);
+csvwrite(strcat(base,'/L1_Ss.csv'),bestSs);
+csvwrite(strcat(base,'/L1_Ft.csv'),bestFt);
+csvwrite(strcat(base,'/L1_St.csv'),bestSt);
+csvwrite(strcat(base,'/L1_Gt.csv'),bestGt);

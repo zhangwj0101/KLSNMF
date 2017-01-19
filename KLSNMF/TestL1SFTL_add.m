@@ -1,5 +1,8 @@
 
-str = 'C:\mydata_add_withtraintest_cutshortdoc_for_wdq/';
+str = 'D:\zwj\20NG_matlabformat/';
+addpath(genpath('lib\lightspeed'));
+addpath(genpath('lib\logreg'));
+addpath(genpath('lib\tSNE'));
 FileList=dir(str);
 ff = 1;
 for rr=1:length(FileList)
@@ -8,8 +11,8 @@ for rr=1:length(FileList)
         ff= ff+1;
     end
 end
-xlswrite(strcat('dirs.xls'),filedors');
-xlswrite(strcat('average.xls'),0);
+% xlswrite(strcat('dirs.xls'),filedors');
+csvwrite(strcat('average.csv'),0);
 for rr=1:length(filedors)
     base = filedors{rr};
     trainPath = strcat(base,'/Train.data');
@@ -44,23 +47,27 @@ for rr=1:length(filedors)
     gamma = 1.5;
     delta = 1.5;
     numK = 50;
-    numCircle = 180;
+    numCircle = 160;
     best = [];
     index= 1;
-    iternum = 10;
+    iternum = 1;
     similarK = 20;
     filename = regexp(base, '/', 'split');
     wname = char(filename(size(filename,2)));
     average = 0.0;
-    xlswrite(strcat(wname,'.xls'),[1:1:numCircle]);
+    csvwrite(strcat(wname,'.csv'),[1:1:numCircle]);
     for time=1:iternum
-        Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta,numK,similarK,numCircle);
-        [res] = xlsread(strcat(wname,'.xls'));
+        Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta,numK,similarK,numCircle,base);
         average = average + max(Results(1,:));
-        xlswrite(strcat(wname,'.xls'),[res;Results]);
+        if rr == 1
+            csvwrite(strcat(wname,'.csv'),[Results]);
+            continue;
+        end
+        [res] = csvread(strcat(wname,'.csv'));
+        csvwrite(strcat(wname,'.csv'),[res;Results]);
     end
-    [res] = xlsread(strcat('average.xls'));
-    xlswrite(strcat('average.xls'),[res;average/iternum]);
+    [res] = csvread(strcat('average.csv'));
+    csvwrite(strcat('average.csv'),[res;average/iternum]);
 end
 
 % x = 0:1:numCircle-1;

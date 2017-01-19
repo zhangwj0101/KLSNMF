@@ -1,4 +1,7 @@
 clear all;
+addpath(genpath('lib\lightspeed'));
+addpath(genpath('lib\logreg'));
+addpath(genpath('lib\tSNE'));
 base='E:\cls-acl10-processed_cutshortdoc\mydata_add_withtraintest\en_de_books_books\';
 TrainX = load(strcat(base,'Train.data'));
 TrainX = spconvert(TrainX);
