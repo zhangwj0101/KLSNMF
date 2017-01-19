@@ -1,4 +1,6 @@
-
+addpath(genpath('lib\lightspeed'));
+addpath(genpath('lib\logreg'));
+addpath(genpath('lib\tSNE'));
 str = 'C:\mydata_add_withtraintest_cutshortdoc/';
 FileList=dir(str);
 ff = 1;
@@ -8,7 +10,7 @@ for rr=1:length(FileList)
         ff= ff+1;
     end
 end
-xlswrite(strcat('dirs.xls'),filedors');
+% xlswrite(strcat('dirs.xls'),filedors');
 for rr=1:length(filedors)
     base = filedors{rr};
     trainPath = strcat(base,'/Train.data');
@@ -47,11 +49,11 @@ for rr=1:length(filedors)
     filename = regexp(base, '/', 'split');
     wname = char(filename(size(filename,2)));
 
-    xlswrite(strcat(wname,'.xls'),[1:1:numCircle]);
+    csvwrite(strcat(wname,'.csv'),[1:1:numCircle]);
     for time=1:10
         Results = KLSNMF(TrainX,TrainY,TestX,TestY,alpha,beta,numK,numCircle);
-        [res] = xlsread(strcat(wname,'.xls'));
-        xlswrite(strcat(wname,'.xls'),[res;Results(1,:)]);
+        [res] = csvread(strcat(wname,'.csv'));
+        csvwrite(strcat(wname,'.csv'),[res;Results(1,:)]);
     end
 end
 % x = 0:1:numCircle-1;
