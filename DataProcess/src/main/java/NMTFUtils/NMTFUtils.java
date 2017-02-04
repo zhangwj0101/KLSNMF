@@ -16,7 +16,9 @@ public class NMTFUtils {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Start!");
-
+        File file = new File("E:\\cls-acl10-processed_cutshortdoc\\mydata_add_withtraintest/");
+        String[] list = file.list();
+        System.out.println(String.join("','",Arrays.asList(list)));
 //        TF2TFIDF();
         //一定要把原领域的test加入到训练集中,论文中的实验是4000天训练数据
         //join();
