@@ -128,12 +128,13 @@ for circleID = 1:numCircle
     tempM1 = 2*(Xs-Fss*Sss*Gs')*Gs*Ssd';
     for i = 1:size(Fsd,1)
         for j = 1:size(Fsd,2)
-            if Fsd(i,j) > Ftd(i,j)
-                gradient = 1;
-            else
-                gradient = -1;
-            end
-            tempMu = tempM(i,j) +gamma*gradient;
+%             if Fsd(i,j) > Ftd(i,j)
+%                 gradient = 1;
+%             else
+%                 gradient = -1;
+%             end
+%             tempMu = tempM(i,j) +gamma*gradient;
+            tempMu = tempM(i,j) +gamma*abs(Fsd(i,j)*Fsd(i,j));
             if tempMu > 0
                 Fsd(i,j) = Fsd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -156,12 +157,13 @@ for circleID = 1:numCircle
     tempM1 = 2*Fsd'*( Xs-Fss*Sss*Gs')*Gs;
     for i = 1:size(Ssd,1)
         for j = 1:size(Ssd,2)
-            if Ssd(i,j) >= Std(i,j)
-                gradient = 1;
-            else
-                gradient = -1;
-            end
-            tempMu = tempM(i,j) + delta*gradient;
+%             if Ssd(i,j) >= Std(i,j)
+%                 gradient = 1;
+%             else
+%                 gradient = -1;
+%             end
+%             tempMu = tempM(i,j) + delta*gradient;
+            tempMu = tempM(i,j) + delta*abs(Ssd(i,j)*Ssd(i,j));
             if tempMu > 0
                 Ssd(i,j) = Ssd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -210,12 +212,13 @@ for circleID = 1:numCircle
     tempM1 = 2*(Xt-Fts*Sts*Gt')*Gt*Std';
     for i = 1:size(Ftd,1)
         for j = 1:size(Ftd,2)
-            if Ftd(i,j) > Fsd(i,j)
-                gradient = 1;
-            else
-                gradient = -1;
-            end
-            tempMu = tempM(i,j) + gamma*gradient;
+%             if Ftd(i,j) > Fsd(i,j)
+%                 gradient = 1;
+%             else
+%                 gradient = -1;
+%             end
+%             tempMu = tempM(i,j) + gamma*gradient;
+            tempMu = tempM(i,j) + gamma*abs(Ftd(i,j)*Ftd(i,j));
             if tempMu > 0
                 Ftd(i,j) = Ftd(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else
@@ -238,12 +241,13 @@ for circleID = 1:numCircle
     tempM1 = 2*Ftd'*(Xt-Fts*Sts*Gt')*Gt;
     for i = 1:size(Std,1)
         for j = 1:size(Std,2)
-            if Std(i,j) >= Ssd(i,j)
-                gradient = 1;
-            else
-                gradient = -1;
-            end
-            tempMu = tempM(i,j) + delta*gradient;
+%             if Std(i,j) >= Ssd(i,j)
+%                 gradient = 1;
+%             else
+%                 gradient = -1;
+%             end
+%             tempMu = tempM(i,j) + delta*gradient;
+            tempMu = tempM(i,j) + delta*abs(Std(i,j)*Std(i,j));
             if tempMu > 0
                 Std(i,j) = Std(i,j)*(tempM1(i,j)/tempMu)^(0.5);
             else

@@ -31,5 +31,5 @@ similarK = 20;
 numCircle = 180;
 best = [];
 index= 1;
-Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta,numK,similarK,numCircle);
+Results = L1SFTL(TrainX,TrainY,TestX,TestY,alpha,beta,gamma,delta,numK,similarK,numCircle,'./');
 
